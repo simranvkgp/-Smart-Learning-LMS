@@ -662,7 +662,7 @@ const role = localStorage.getItem("userRole");
 
 if (!token || role !== "student") {
   alert("Please login as a student ❌");
-  window.location.href = "login.html";
+  window.location.href = "index.html";
 }
 
 // Decode JWT to get email
@@ -855,7 +855,7 @@ async function submitAssignment() {
 
 function logout() {
   localStorage.clear();
-  window.location.href = "login.html";
+  window.location.href = "index.html";
 }
 
 async function loadCourses() {

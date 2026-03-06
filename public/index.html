@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>LMS Register</title>
+  <title>LMS Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * {
@@ -28,7 +28,7 @@
       100% { background-position: 0% 50%; }
     }
 
-    .register-container {
+    .login-container {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -37,7 +37,7 @@
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       border: 1px solid rgba(255, 255, 255, 0.3);
       width: 100%;
-      max-width: 500px;
+      max-width: 450px;
       animation: slideUp 0.5s ease;
     }
 
@@ -92,8 +92,7 @@
       font-size: 14px;
     }
 
-    .form-group input,
-    .form-group select {
+    .form-group input {
       width: 100%;
       padding: 16px 20px;
       border: 2px solid #e0e0e0;
@@ -104,8 +103,7 @@
       background: white;
     }
 
-    .form-group input:focus,
-    .form-group select:focus {
+    .form-group input:focus {
       outline: none;
       border-color: #667eea;
       box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
@@ -114,51 +112,6 @@
 
     .form-group input::placeholder {
       color: #999;
-    }
-
-    .form-group select {
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 20px center;
-      padding-right: 45px;
-    }
-
-    .role-options {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    .role-option {
-      padding: 14px;
-      border: 2px solid #e0e0e0;
-      border-radius: 12px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s;
-      background: white;
-      font-weight: 500;
-      font-size: 14px;
-    }
-
-    .role-option:hover {
-      border-color: #667eea;
-      background: rgba(102, 126, 234, 0.05);
-    }
-
-    .role-option.active {
-      border-color: #667eea;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-
-    .role-option .icon {
-      font-size: 24px;
-      display: block;
-      margin-bottom: 6px;
     }
 
     .btn-submit {
@@ -191,20 +144,20 @@
       transform: none;
     }
 
-    .login-link {
+    .register-link {
       text-align: center;
       margin-top: 30px;
       padding-top: 30px;
       border-top: 1px solid #e0e0e0;
     }
 
-    .login-link p {
+    .register-link p {
       color: #666;
       font-size: 14px;
       margin-bottom: 12px;
     }
 
-    .login-link a {
+    .register-link a {
       color: #667eea;
       text-decoration: none;
       font-weight: 600;
@@ -212,7 +165,7 @@
       display: inline-block;
     }
 
-    .login-link a:hover {
+    .register-link a:hover {
       color: #764ba2;
       transform: translateX(3px);
     }
@@ -273,16 +226,9 @@
       display: inline-block;
     }
 
-    .password-requirements {
-      font-size: 12px;
-      color: #666;
-      margin-top: 6px;
-      padding-left: 4px;
-    }
-
     /* Responsive Design */
     @media (max-width: 480px) {
-      .register-container {
+      .login-container {
         padding: 40px 30px;
         border-radius: 20px;
       }
@@ -294,26 +240,22 @@
       .logo-icon {
         font-size: 48px;
       }
-
-      .role-options {
-        grid-template-columns: 1fr;
-      }
     }
   </style>
 </head>
 <body>
 
-<div class="register-container">
+<div class="login-container">
   <div class="logo-section">
     <span class="logo-icon">🎓</span>
     <h1 class="logo-title">LMS</h1>
-    <p class="logo-subtitle">Create Your Account</p>
+    <p class="logo-subtitle">Learning Management System</p>
   </div>
 
   <div class="error-message" id="errorMessage"></div>
   <div class="success-message" id="successMessage"></div>
 
-  <form id="registerForm">
+  <form id="loginForm">
     <div class="form-group">
       <label for="email">📧 Email Address</label>
       <input 
@@ -330,61 +272,31 @@
       <input 
         type="password" 
         id="password" 
-        placeholder="Create a password" 
+        placeholder="Enter your password" 
         required
-        autocomplete="new-password"
-        minlength="6"
+        autocomplete="current-password"
       >
-      <div class="password-requirements">Minimum 6 characters</div>
-    </div>
-
-    <div class="form-group">
-      <label>👤 Select Your Role</label>
-      <div class="role-options">
-        <div class="role-option active" data-role="student" onclick="selectRole('student')">
-          <span class="icon">🎓</span>
-          <span>Student</span>
-        </div>
-        <div class="role-option" data-role="teacher" onclick="selectRole('teacher')">
-          <span class="icon">👨‍🏫</span>
-          <span>Teacher</span>
-        </div>
-        <div class="role-option" data-role="admin" onclick="selectRole('admin')">
-          <span class="icon">🔐</span>
-          <span>Admin</span>
-        </div>
-      </div>
-      <input type="hidden" id="role" name="role" value="student">
     </div>
 
     <button type="submit" class="btn-submit" id="submitBtn">
-      <span id="submitText">✨ Create Account</span>
+      <span id="submitText">🚀 Login</span>
       <span class="loading-spinner" id="loadingSpinner"></span>
     </button>
   </form>
 
-  <div class="login-link">
-    <p>Already have an account?</p>
-    <a href="index.html">Sign in →</a>
+  <div class="register-link">
+    <p>Don't have an account?</p>
+    <a href="register.html">Create an account →</a>
   </div>
 </div>
 
 <script>
-const registerForm = document.getElementById("registerForm");
+const loginForm = document.getElementById("loginForm");
 const errorMessage = document.getElementById("errorMessage");
 const successMessage = document.getElementById("successMessage");
 const submitBtn = document.getElementById("submitBtn");
 const submitText = document.getElementById("submitText");
 const loadingSpinner = document.getElementById("loadingSpinner");
-const roleInput = document.getElementById("role");
-
-function selectRole(role) {
-  roleInput.value = role;
-  document.querySelectorAll('.role-option').forEach(option => {
-    option.classList.remove('active');
-  });
-  document.querySelector(`[data-role="${role}"]`).classList.add('active');
-}
 
 function showError(message) {
   errorMessage.textContent = message;
@@ -413,49 +325,54 @@ function setLoading(loading) {
   }
 }
 
-registerForm.addEventListener("submit", async function(e) {
+loginForm.addEventListener("submit", async function(e) {
   e.preventDefault();
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
-  const role = roleInput.value;
 
   if (!email || !password) {
     showError("Please fill in all fields");
     return;
   }
 
-  if (password.length < 6) {
-    showError("Password must be at least 6 characters long");
-    return;
-  }
-
   setLoading(true);
 
   try {
-    const response = await fetch("/register", {
+    const response = await fetch("/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ email, password, role })
+      body: JSON.stringify({ email, password })
     });
 
     const data = await response.json();
 
-    if (data.message && data.message.includes("Successfully")) {
-      showSuccess("Registration successful! Redirecting to login...");
-      
+    if (data.token) {
+      // Store JWT token
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("userRole", data.role);
+
+      showSuccess("Login successful! Redirecting...");
+
+      // Redirect based on role
       setTimeout(() => {
-        window.location.href = "index.html";
-      }, 1500);
+        if (data.role === "admin") {
+          window.location.href = "admin-dashboard.html";
+        } else if (data.role === "teacher") {
+          window.location.href = "dashboard.html";
+        } else {
+          window.location.href = "student-dashboard.html";
+        }
+      }, 1000);
     } else {
       setLoading(false);
-      showError(data.message || "Registration failed. Please try again.");
+      showError(data.message || "Login failed. Please check your credentials.");
     }
   } catch (error) {
     setLoading(false);
-    console.error("Registration error:", error);
+    console.error("Login error:", error);
     showError("Network error. Please try again.");
   }
 });

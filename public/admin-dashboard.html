@@ -968,7 +968,7 @@ const role = localStorage.getItem("userRole");
 
 if (!token || role !== "admin") {
   alert("Admin access only ❌");
-  window.location.href = "login.html";
+  window.location.href = "index.html";
 }
 
 // Decode JWT to get email
@@ -983,7 +983,7 @@ let allActiveUsers = [];
 
 function logout() {
   localStorage.clear();
-  window.location.href = "login.html";
+  window.location.href = "index.html";
 }
 
 function switchTab(tabName, event) {
