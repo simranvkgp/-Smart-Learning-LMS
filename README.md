@@ -1,12 +1,12 @@
 # Smart Learning LMS
 
-A Node.js + Express learning management system with roles (Admin, Teacher, Student). Teachers create courses (PDF, SCORM, images), add assignments and quiz questions. Students enroll, submit assignments, take quizzes, and get certificates after passing.
+A Node.js + Express Learning Management System (LMS) with role-based access (Admin, Teacher, Student). Teachers create courses and assessments; students enroll, submit assignments, take quizzes, and download certificates after passing.
 
 ## Features
 
 - **Roles:** Admin, Teacher, Student (JWT login)
-- **Teacher:** Add courses (PDF, image, SCORM), assignments with due dates, quiz questions; view enrollments and grade assignment submissions
-- **Student:** Browse courses, enroll, view assignments (course name + due date), submit assignments (PDF or text), take quiz (50% to get certificate), download certificate
+- **Teacher:** Create courses (PDF, image, SCORM), add assignments (due dates) and quiz questions; view enrollments; grade submissions
+- **Student:** Browse/enroll in courses; view assignments; submit work (PDF or text); take quizzes (50%+ to get certificate); download certificates
 - **Admin:** Manage users, courses, enrollments
 
 ## Tech Stack
@@ -39,12 +39,18 @@ A Node.js + Express learning management system with roles (Admin, Teacher, Stude
 5. **First use**
    - Open the app, register as Admin/Teacher/Student, then login.
 
+## Environment Variables
+
+- `PORT`: Server port (default: 5000)
+- `MONGO_URI`: MongoDB connection string
+- `JWT_SECRET`: Secret used to sign JWT tokens (set a strong value in production)
+
 ## Project Structure
 
 - `server.js` – Express app, routes, APIs
 - `models/` – User, Course, Enrollment, Question, QuizAttempt, Assignment, AssignmentSubmission
-- `public/` – login, register, admin-dashboard, dashboard (teacher), student-dashboard, my-courses; uploads folder for files
+- `public/` – static pages (login/register/dashboards) and uploads
 
 ## License
 
-ISC
+ISC (see `LICENSE`)

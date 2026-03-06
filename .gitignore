@@ -1,27 +1,39 @@
 # Dependencies
 node_modules/
 
-# Environment (never commit secrets)
+# Environment files
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
-# User uploads (PDFs, images, SCORM, assignments)
+# Uploads / generated content
 public/uploads/
+uploads/
 
 # Logs
+logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# OS
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage
+.nyc_output
+
+# Build output (common)
+dist
+build
+
+# OS / Editor
 .DS_Store
 Thumbs.db
-
-# IDE / Editor
-.idea/
 .vscode/
-*.swp
-*.swo
-
-# Optional
-.cursor/
+.idea/
