@@ -1,4 +1,4 @@
-# LMS – Learning Management System
+# Smart Learning LMS
 
 A Node.js + Express learning management system with roles (Admin, Teacher, Student). Teachers create courses (PDF, SCORM, images), add assignments and quiz questions. Students enroll, submit assignments, take quizzes, and get certificates after passing.
 
@@ -17,8 +17,8 @@ A Node.js + Express learning management system with roles (Admin, Teacher, Stude
 
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/LMS.git
-   cd LMS
+   git clone https://github.com/simranvkgp/Smart-Learning-LMS.git
+   cd Smart-Learning-LMS
    ```
 
 2. **Install dependencies**
