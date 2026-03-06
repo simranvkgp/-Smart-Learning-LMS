@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Teacher Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      color: #1a1a1a;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      color: #e2e8f0;
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+    }
+    .sidebar-brand {
+      padding: 0 24px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 16px;
+    }
+    .sidebar-brand h1 {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-nav {
+      flex: 1;
+    }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 24px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-nav a:hover {
+      background: rgba(255,255,255,0.06);
+      color: #f1f5f9;
+    }
+    .sidebar-nav a.active {
+      background: rgba(102, 126, 234, 0.2);
+      color: #a5b4fc;
+      border-left-color: #667eea;
+    }
+    .sidebar-footer {
+      padding: 16px 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-footer .logout-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .sidebar-footer .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.35);
+      color: #fff;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 32px 40px 48px;
+      overflow-y: auto;
+    }
+    .panel {
+      display: none;
+    }
+    .panel.active {
+      display: block;
+    }
+    .panel-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+    .panel-subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+      margin-bottom: 24px;
+    }
+
+    form input[type="text"],
+    form textarea,
+    form input[type="file"] {
+      width: 100%;
+      padding: 12px 14px;
+      margin: 8px 0 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    form input:focus, form textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+    form textarea { min-height: 100px; resize: vertical; }
+    form label { font-size: 13px; font-weight: 600; color: #475569; display: block; margin-top: 4px; }
+    form button[type="submit"] {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    form button[type="submit"]:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    }
+
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .course-card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .course-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+    }
+    .course-card-image {
+      height: 160px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+    .course-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .course-card-body {
+      padding: 20px;
+    }
+    .course-card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .course-card-desc {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.5;
+      margin-bottom: 14px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .course-card-badges {
+      margin-bottom: 14px;
+    }
+    .badge-scorm {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .course-card-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .course-card-actions button {
+      flex: 1;
+      min-width: 90px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-edit {
+      background: #eef2ff;
+      color: #4338ca;
+    }
+    .btn-edit:hover {
+      background: #4338ca;
+      color: #fff;
+    }
+    .btn-delete {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+    .btn-delete:hover {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .chart-section {
+      margin-bottom: 28px;
+    }
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 880px) {
+      .charts-row { grid-template-columns: 1fr; }
+    }
+    .chart-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 32px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+    }
+    .chart-card .chart-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .chart-card .chart-desc {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+    .chart-wrap {
+      position: relative;
+      height: 300px;
+    }
+    .chart-empty {
+      height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #64748b;
+      font-size: 15px;
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+    .chart-empty strong { color: #475569; }
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    }
+    .stat-card h3 { font-size: 13px; font-weight: 600; opacity: 0.9; margin-bottom: 6px; }
+    .stat-card .number { font-size: 28px; font-weight: 800; }
+
+    #enrollmentList > div {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 14px 18px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    #enrollmentList > div strong { color: #475569; }
+
+    .btn-questions {
+      background: #f0fdf4;
+      color: #15803d;
+    }
+    .btn-questions:hover {
+      background: #15803d;
+      color: #fff;
+    }
+    .btn-assignments {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+    .btn-assignments:hover {
+      background: #1d4ed8;
+      color: #fff;
+    }
+
+    .quiz-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .quiz-modal-overlay.show { display: flex; }
+    .quiz-modal {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 560px;
+      width: 100%;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.2);
+    }
+    .quiz-modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .quiz-modal-header h3 { font-size: 18px; color: #1e293b; margin: 0; }
+    .quiz-modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; padding: 0 4px; }
+    .quiz-modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+    .quiz-modal-body label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+    .quiz-modal-body input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; }
+    .quiz-modal-body select { padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; }
+    .quiz-add-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; }
+    .quiz-add-btn:hover { opacity: 0.95; }
+    .question-item { background: #f8fafc; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
+    .question-item p { margin: 0 0 8px; font-size: 14px; color: #1e293b; }
+    .question-item small { color: #64748b; }
+    .question-item button { margin-top: 8px; padding: 6px 12px; font-size: 12px; background: #fef2f2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer; }
+    .assignment-item { background: #f8fafc; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
+    .assignment-item strong { font-size: 14px; color: #1e293b; }
+    .assignment-item .due { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .assignment-item button { margin-top: 8px; padding: 6px 12px; font-size: 12px; background: #fef2f2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer; }
+    .assignment-item .btn-submissions { background: #e0e7ff; color: #4338ca; margin-left: 8px; }
+    .assignment-item .btn-submissions:hover { background: #4338ca; color: #fff; }
+    .submission-row { background: #f8fafc; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
+    .submission-row .student-email { font-weight: 600; color: #334155; }
+    .submission-row .submitted-at { font-size: 12px; color: #64748b; margin-top: 4px; }
+    .submission-row .submission-content { margin-top: 8px; font-size: 13px; color: #475569; white-space: pre-wrap; }
+    .submission-row .marks-display { margin-top: 6px; font-weight: 700; color: #059669; }
+    .grade-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1001; align-items: center; justify-content: center; padding: 20px; }
+    .grade-modal-overlay.show { display: flex; }
+    .grade-modal { background: #fff; border-radius: 16px; padding: 24px; max-width: 400px; width: 100%; }
+    .grade-modal label { display: block; font-weight: 600; color: #475569; margin-bottom: 6px; }
+    .grade-modal input, .grade-modal textarea { width: 100%; padding: 10px 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 8px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: #64748b;
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state-text { font-size: 16px; font-weight: 600; color: #475569; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 72px; padding: 16px 0; }
+      .sidebar-brand h1 span { display: none; }
+      .sidebar-nav a span { display: none; }
+      .sidebar-nav a { justify-content: center; padding: 14px; }
+      .sidebar-footer .logout-btn span { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1>🎓 <span>Teacher</span></h1>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-link active" data-panel="dashboard">📊 <span>Dashboard</span></a>
+      <a href="#" class="nav-link" data-panel="add">➕ <span>Add Course</span></a>
+      <a href="#" class="nav-link" data-panel="courses">📚 <span>All Courses</span></a>
+      <a href="#" class="nav-link" data-panel="enrollments">👥 <span>Enrolled Students</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <button type="button" class="logout-btn" onclick="logout()">🚪 <span>Logout</span></button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div id="panel-dashboard" class="panel active">
+      <h2 class="panel-title">Dashboard</h2>
+      <p class="panel-subtitle">Overview of your courses and enrollments</p>
+      <div class="stats-row">
+        <div class="stat-card">
+          <h3>Total Courses</h3>
+          <div class="number" id="statCourses">0</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+          <h3>Total Enrollments</h3>
+          <div class="number" id="statEnrollments">0</div>
+        </div>
+      </div>
+      <div class="chart-section">
+        <div id="chartEmpty" class="chart-empty" style="display:none;">
+          <strong>No courses yet</strong>
+          <span>Add courses from the menu. When students enroll, the line graphs below will show the data.</span>
+        </div>
+        <div class="charts-row" id="chartsRow" style="display:none;">
+          <div class="chart-card">
+            <div class="chart-title">Enrollments per course</div>
+            <div class="chart-desc">Line shows number of enrollments for each course.</div>
+            <div class="chart-wrap">
+              <canvas id="lineChart1"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Students per course</div>
+            <div class="chart-desc">Line shows students enrolled in each course.</div>
+            <div class="chart-wrap">
+              <canvas id="lineChart2"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <p style="color:#64748b;">Use the menu to <strong>Add Course</strong>, manage <strong>All Courses</strong>, or view <strong>Enrolled Students</strong>.</p>
+      </div>
+    </div>
+
+    <div id="panel-add" class="panel">
+      <h2 class="panel-title">Add New Course</h2>
+      <p class="panel-subtitle">Create a course with PDF, image, or SCORM package</p>
+      <div class="card">
+        <form id="courseForm" enctype="multipart/form-data">
+          <label>Course Title</label>
+          <input type="text" id="title" name="title" placeholder="e.g. Introduction to Programming" required>
+          <label>Course Description</label>
+          <textarea id="description" name="description" placeholder="Brief description of the course" required></textarea>
+          <label>📄 Upload PDF (optional)</label>
+          <input type="file" name="pdf" accept=".pdf">
+          <label>🖼 Upload Image (optional)</label>
+          <input type="file" name="image" accept="image/*">
+          <label>📦 SCORM Package – ZIP (videos, PDFs, etc.)</label>
+          <input type="file" name="scorm" accept=".zip,application/zip,application/x-zip-compressed">
+          <small style="display:block; color:#64748b; margin-top:4px; margin-bottom:12px;">Include <strong>index.html</strong> at the root of the zip for best playback.</small>
+          <button type="submit">Add Course</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="panel-courses" class="panel">
+      <h2 class="panel-title">All Courses</h2>
+      <p class="panel-subtitle">Edit or delete your courses</p>
+      <div id="courseList" class="courses-grid"></div>
+    </div>
+
+    <div id="panel-enrollments" class="panel">
+      <h2 class="panel-title">Enrolled Students</h2>
+      <p class="panel-subtitle">Students enrolled in your courses</p>
+      <div id="enrollmentList"></div>
+    </div>
+  </main>
+
+  <div id="submissionsModal" class="quiz-modal-overlay">
+    <div class="quiz-modal" style="max-width: 580px;">
+      <div class="quiz-modal-header">
+        <h3 id="submissionsModalTitle">📥 Submissions</h3>
+        <button type="button" class="quiz-modal-close" onclick="closeSubmissionsModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="quiz-modal-body">
+        <div id="submissionsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="gradeModal" class="grade-modal-overlay">
+    <div class="grade-modal">
+      <h3 style="margin-bottom:16px;">Give marks</h3>
+      <label>Marks</label>
+      <input type="number" id="gradeMarks" min="0" max="100" placeholder="0–100">
+      <label>Feedback (optional)</label>
+      <textarea id="gradeFeedback" rows="3" placeholder="Feedback for student"></textarea>
+      <div style="display:flex; gap:10px; margin-top:12px;">
+        <button type="button" class="quiz-add-btn" onclick="saveGrade()">Save marks</button>
+        <button type="button" class="btn-delete" onclick="closeGradeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="assignmentsModal" class="quiz-modal-overlay">
+    <div class="quiz-modal" style="max-width: 520px;">
+      <div class="quiz-modal-header">
+        <h3 id="assignmentsModalTitle">📋 Assignments</h3>
+        <button type="button" class="quiz-modal-close" onclick="closeAssignmentsModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="quiz-modal-body">
+        <div id="assignmentsList"></div>
+        <hr style="margin:16px 0; border:0; border-top:1px solid #e2e8f0;">
+        <label>Assignment title</label>
+        <input type="text" id="assignmentTitle" placeholder="e.g. Week 1 Essay">
+        <label>Description (optional)</label>
+        <input type="text" id="assignmentDesc" placeholder="Brief instructions">
+        <label>Due date</label>
+        <input type="datetime-local" id="assignmentDueDate" required>
+        <button type="button" class="quiz-add-btn" onclick="addAssignment()" style="margin-top:12px;">Add Assignment</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="questionsModal" class="quiz-modal-overlay">
+    <div class="quiz-modal">
+      <div class="quiz-modal-header">
+        <h3 id="questionsModalTitle">📝 Assessment Questions</h3>
+        <button type="button" class="quiz-modal-close" onclick="closeQuestionsModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="quiz-modal-body">
+        <p class="panel-subtitle" style="margin-bottom:16px;">Students must score 50% on this paper to get the certificate. Add questions manually.</p>
+        <div id="questionsList"></div>
+        <hr style="margin:20px 0; border:0; border-top:1px solid #e2e8f0;">
+        <label>New question</label>
+        <input type="text" id="newQuestionText" placeholder="Question text">
+        <label>Option A</label>
+        <input type="text" id="newOpt0" placeholder="Option A">
+        <label>Option B</label>
+        <input type="text" id="newOpt1" placeholder="Option B">
+        <label>Option C</label>
+        <input type="text" id="newOpt2" placeholder="Option C">
+        <label>Option D</label>
+        <input type="text" id="newOpt3" placeholder="Option D">
+        <label>Correct answer</label>
+        <select id="newCorrectIndex">
+          <option value="0">A</option>
+          <option value="1">B</option>
+          <option value="2">C</option>
+          <option value="3">D</option>
+        </select>
+        <button type="button" class="quiz-add-btn" onclick="addQuestion()">Add Question</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+const token = localStorage.getItem("token");
+const role = localStorage.getItem("userRole");
+if (!token || role !== "teacher") {
+  alert("Please login as a teacher ❌");
+  window.location.href = "login.html";
+}
+const decodedToken = JSON.parse(atob(token.split('.')[1]));
+const email = decodedToken.email;
+
+document.querySelectorAll(".nav-link").forEach(link => {
+  link.addEventListener("click", function(e) {
+    e.preventDefault();
+    const panelId = "panel-" + this.getAttribute("data-panel");
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+    document.getElementById(panelId).classList.add("active");
+    this.classList.add("active");
+  });
+});
+
+document.getElementById("courseForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const form = document.getElementById("courseForm");
+  const formData = new FormData();
+  formData.append("title", form.title.value.trim());
+  formData.append("description", form.description.value.trim());
+  formData.append("teacherEmail", email);
+  const pdfInput = form.querySelector('input[name="pdf"]');
+  const imageInput = form.querySelector('input[name="image"]');
+  const scormInput = form.querySelector('input[name="scorm"]');
+  if (pdfInput.files.length > 0) formData.append("pdf", pdfInput.files[0]);
+  if (imageInput.files.length > 0) formData.append("image", imageInput.files[0]);
+  if (scormInput.files.length > 0) formData.append("scorm", scormInput.files[0], scormInput.files[0].name || "package.zip");
+  let message = "";
+  try {
+    const response = await fetch("/add-course", { method: "POST", body: formData });
+    const text = await response.text();
+    try {
+      const data = JSON.parse(text);
+      message = data.message || (response.ok ? "Course added." : "Request failed.");
+    } catch (_) {
+      message = text.trimStart().startsWith("<") ? "Server error. Restart and try again." : "Server error: " + (text.slice(0, 60) || response.status);
+    }
+    if (response.ok) {
+      loadCourses();
+      updateDashboardStats();
+      form.reset();
+      document.querySelector('[data-panel="courses"]').click();
+    }
+  } catch (err) {
+    message = "Network error: " + (err.message || "");
+  }
+  alert(message);
+});
+
+async function loadCourses() {
+  const response = await fetch("/courses");
+  const allCourses = await response.json();
+  const courses = allCourses.filter((c) => c.teacherEmail === email);
+  const container = document.getElementById("courseList");
+  if (!courses.length) {
+    container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📚</div><div class="empty-state-text">No courses yet</div><p class="panel-subtitle" style="margin-top:8px;">Add a course from the menu.</p></div>';
+    return;
+  }
+  container.innerHTML = courses.map(course => {
+    const img = course.image ? `<img src="/uploads/${course.image}" alt="">` : '<div style="font-size:48px;">📚</div>';
+    const scormBadge = course.scormPath ? '<span class="badge-scorm">📦 SCORM</span>' : '';
+    const desc = (course.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const descShort = desc.length > 120 ? desc.substring(0, 120) + '...' : desc;
+    const titleEsc = (course.title || '').replace(/"/g, '&quot;');
+    const descEsc = (course.description || '').replace(/"/g, '&quot;');
+    return `
+      <div class="course-card">
+        <div class="course-card-image">${img}</div>
+        <div class="course-card-body">
+          <h3 class="course-card-title">${titleEsc}</h3>
+          <p class="course-card-desc">${descShort}</p>
+          <div class="course-card-badges">${scormBadge}</div>
+          <div class="course-card-actions">
+            <button type="button" class="btn-assignments" data-id="${course._id}" data-title="${titleEsc}">📋 Assignments</button>
+            <button type="button" class="btn-questions" data-id="${course._id}" data-title="${titleEsc}">📝 Questions</button>
+            <button type="button" class="btn-edit" data-id="${course._id}" data-title="${titleEsc}" data-desc="${descEsc}">✏️ Edit</button>
+            <button type="button" class="btn-delete" onclick="deleteCourse('${course._id}')">🗑️ Delete</button>
+          </div>
+        </div>
+      </div>`;
+  }).join("");
+  container.querySelectorAll(".btn-edit").forEach(btn => {
+    btn.addEventListener("click", function() {
+      editCourse(this.getAttribute("data-id"), this.getAttribute("data-title"), this.getAttribute("data-desc"));
+    });
+  });
+  container.querySelectorAll(".btn-questions").forEach(btn => {
+    btn.addEventListener("click", function() {
+      openQuestionsModal(this.getAttribute("data-id"), this.getAttribute("data-title"));
+    });
+  });
+  container.querySelectorAll(".btn-assignments").forEach(btn => {
+    btn.addEventListener("click", function() {
+      openAssignmentsModal(this.getAttribute("data-id"), this.getAttribute("data-title"));
+    });
+  });
+}
+
+let questionsModalCourseId = null;
+function openQuestionsModal(courseId, courseTitle) {
+  questionsModalCourseId = courseId;
+  document.getElementById("questionsModalTitle").textContent = "📝 Assessment: " + (courseTitle || "Course");
+  document.getElementById("questionsModal").classList.add("show");
+  loadQuestionsForModal();
+}
+function closeQuestionsModal() {
+  document.getElementById("questionsModal").classList.remove("show");
+  questionsModalCourseId = null;
+}
+async function loadQuestionsForModal() {
+  if (!questionsModalCourseId) return;
+  const res = await fetch("/teacher/course/" + questionsModalCourseId + "/questions");
+  const questions = await res.json();
+  const list = document.getElementById("questionsList");
+  if (!questions.length) {
+    list.innerHTML = "<p class=\"panel-subtitle\">No questions yet. Add one below.</p>";
+    return;
+  }
+  const labels = ["A", "B", "C", "D"];
+  list.innerHTML = questions.map((q) => {
+    const opt = (q.options && q.options[q.correctIndex]) ? q.options[q.correctIndex] : "";
+    return `<div class="question-item">
+      <p>${escapeHtml(q.questionText)}</p>
+      <small>Correct: ${labels[Number(q.correctIndex)]} – ${escapeHtml(opt)}</small>
+      <br><button type="button" onclick="deleteQuestion('${q._id}')">Delete</button>
+    </div>`;
+  }).join("");
+}
+function escapeHtml(s) {
+  const d = document.createElement("div");
+  d.textContent = s || "";
+  return d.innerHTML;
+}
+async function addQuestion() {
+  if (!questionsModalCourseId) return;
+  const questionText = document.getElementById("newQuestionText").value.trim();
+  const opt0 = document.getElementById("newOpt0").value.trim();
+  const opt1 = document.getElementById("newOpt1").value.trim();
+  const opt2 = document.getElementById("newOpt2").value.trim();
+  const opt3 = document.getElementById("newOpt3").value.trim();
+  const correctIndex = parseInt(document.getElementById("newCorrectIndex").value, 10);
+  if (!questionText || !opt0 || !opt1) {
+    alert("Enter question text and at least options A and B.");
+    return;
+  }
+  const options = [opt0, opt1, opt2, opt3].filter(Boolean);
+  if (correctIndex >= options.length) {
+    alert("Correct answer must be one of the options you filled.");
+    return;
+  }
+  const res = await fetch("/teacher/course/" + questionsModalCourseId + "/questions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ questionText, options, correctIndex })
+  });
+  const data = await res.json();
+  if (data._id) {
+    document.getElementById("newQuestionText").value = "";
+    document.getElementById("newOpt0").value = document.getElementById("newOpt1").value = document.getElementById("newOpt2").value = document.getElementById("newOpt3").value = "";
+    loadQuestionsForModal();
+  } else {
+    alert(data.message || "Failed to add question");
+  }
+}
+async function deleteQuestion(id) {
+  if (!confirm("Delete this question?")) return;
+  await fetch("/teacher/question/" + id, { method: "DELETE" });
+  loadQuestionsForModal();
+}
+
+let assignmentsModalCourseId = null;
+let assignmentsModalCourseTitle = "";
+function openAssignmentsModal(courseId, courseTitle) {
+  assignmentsModalCourseId = courseId;
+  assignmentsModalCourseTitle = (courseTitle || "Course").replace(/&quot;/g, '"');
+  document.getElementById("assignmentsModalTitle").textContent = "📋 Assignments: " + assignmentsModalCourseTitle;
+  document.getElementById("assignmentsModal").classList.add("show");
+  document.getElementById("assignmentTitle").value = "";
+  document.getElementById("assignmentDesc").value = "";
+  var tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  document.getElementById("assignmentDueDate").value = tomorrow.toISOString().slice(0, 16);
+  loadAssignmentsForModal();
+}
+function closeAssignmentsModal() {
+  document.getElementById("assignmentsModal").classList.remove("show");
+  assignmentsModalCourseId = null;
+}
+async function loadAssignmentsForModal() {
+  if (!assignmentsModalCourseId) return;
+  const res = await fetch("/teacher/course/" + assignmentsModalCourseId + "/assignments");
+  const list = await res.json();
+  const container = document.getElementById("assignmentsList");
+  if (!list.length) {
+    container.innerHTML = "<p class=\"panel-subtitle\">No assignments yet. Add one below.</p>";
+    return;
+  }
+  container.innerHTML = list.map(function(a) {
+    var dueStr = new Date(a.dueDate).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+    var desc = (a.description || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    var titleEsc = escapeHtml(a.title);
+    return '<div class="assignment-item"><strong>' + titleEsc + '</strong>' +
+      (desc ? '<p style="margin:4px 0 0; font-size:13px; color:#64748b;">' + desc + '</p>' : '') +
+      '<div class="due">Due: ' + dueStr + '</div>' +
+      '<button type="button" onclick="deleteAssignment(\'' + a._id + '\')">Delete</button> ' +
+      '<button type="button" class="btn-submissions" data-aid="' + (a._id + "").replace(/"/g, "&quot;") + '" data-atitle="' + titleEsc + '" onclick="openSubmissionsModalFromBtn(this)">View submissions</button></div>';
+  }).join("");
+}
+function openSubmissionsModalFromBtn(btn) {
+  var id = btn.getAttribute("data-aid");
+  var title = btn.getAttribute("data-atitle") || "";
+  openSubmissionsModal(id, title);
+}
+var submissionsModalAssignmentId = null;
+async function openSubmissionsModal(assignmentId, assignmentTitle) {
+  submissionsModalAssignmentId = assignmentId;
+  document.getElementById("submissionsModalTitle").textContent = "Submissions: " + (assignmentTitle || "Assignment");
+  document.getElementById("submissionsModal").classList.add("show");
+  document.getElementById("submissionsList").innerHTML = "<p>Loading...</p>";
+  const res = await fetch("/teacher/assignment/" + assignmentId + "/submissions");
+  const submissions = await res.json();
+  const listEl = document.getElementById("submissionsList");
+  if (!submissions.length) {
+    listEl.innerHTML = "<p class=\"panel-subtitle\">No submissions yet.</p>";
+    return;
+  }
+  listEl.innerHTML = submissions.map(function(s) {
+    var dateStr = new Date(s.submittedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+    var contentEsc = escapeHtml((s.content || "").slice(0, 500));
+    if ((s.content || "").length > 500) contentEsc += "…";
+    var marksHtml = s.marks != null ? '<div class="marks-display">Marks: ' + s.marks + '</div>' : "";
+    return '<div class="submission-row">' +
+      '<div class="student-email">' + escapeHtml(s.studentEmail) + '</div>' +
+      '<div class="submitted-at">Submitted: ' + dateStr + '</div>' +
+      (s.content ? '<div class="submission-content">' + contentEsc + '</div>' : '') +
+      marksHtml +
+      '<button type="button" class="quiz-add-btn" style="margin-top:10px; font-size:13px; padding:8px 14px;" onclick="openGradeModal(\'' + s._id + '\')">Grade</button></div>';
+  }).join("");
+}
+function closeSubmissionsModal() {
+  document.getElementById("submissionsModal").classList.remove("show");
+  submissionsModalAssignmentId = null;
+}
+var gradeModalSubmissionId = null;
+function openGradeModal(submissionId) {
+  gradeModalSubmissionId = submissionId;
+  document.getElementById("gradeMarks").value = "";
+  document.getElementById("gradeFeedback").value = "";
+  document.getElementById("gradeModal").classList.add("show");
+}
+function closeGradeModal() {
+  document.getElementById("gradeModal").classList.remove("show");
+  gradeModalSubmissionId = null;
+}
+async function saveGrade() {
+  if (!gradeModalSubmissionId) return;
+  var marks = document.getElementById("gradeMarks").value.trim();
+  var feedback = document.getElementById("gradeFeedback").value.trim();
+  if (marks === "") {
+    alert("Enter marks.");
+    return;
+  }
+  var res = await fetch("/teacher/submission/" + gradeModalSubmissionId + "/grade", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ marks: Number(marks), feedback: feedback, teacherEmail: email })
+  });
+  var data = await res.json();
+  if (data._id || data.assignmentId) {
+    closeGradeModal();
+    if (submissionsModalAssignmentId) {
+      var title = document.getElementById("submissionsModalTitle").textContent.replace("Submissions: ", "");
+      openSubmissionsModal(submissionsModalAssignmentId, title);
+    }
+  } else {
+    alert(data.message || "Failed to save marks");
+  }
+}
+async function addAssignment() {
+  if (!assignmentsModalCourseId) return;
+  var title = document.getElementById("assignmentTitle").value.trim();
+  var dueVal = document.getElementById("assignmentDueDate").value;
+  if (!title || !dueVal) {
+    alert("Enter assignment title and due date.");
+    return;
+  }
+  var res = await fetch("/teacher/assignment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      courseId: assignmentsModalCourseId,
+      courseTitle: assignmentsModalCourseTitle,
+      title: title,
+      description: document.getElementById("assignmentDesc").value.trim(),
+      dueDate: new Date(dueVal).toISOString(),
+      teacherEmail: email
+    })
+  });
+  var data = await res.json();
+  if (data._id) {
+    document.getElementById("assignmentTitle").value = "";
+    document.getElementById("assignmentDesc").value = "";
+    loadAssignmentsForModal();
+  } else {
+    alert(data.message || "Failed to add assignment");
+  }
+}
+async function deleteAssignment(id) {
+  if (!confirm("Delete this assignment?")) return;
+  await fetch("/teacher/assignment/" + id, { method: "DELETE" });
+  loadAssignmentsForModal();
+}
+
+function editCourse(id, oldTitle, oldDescription) {
+  const newTitle = prompt("Edit Course Title:", oldTitle || "");
+  const newDescription = prompt("Edit Course Description:", oldDescription || "");
+  if (!newTitle || !newDescription) {
+    alert("All fields are required ❌");
+    return;
+  }
+  fetch(`/update-course/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title: newTitle, description: newDescription })
+  })
+  .then(r => r.json())
+  .then(data => { alert(data.message); loadCourses(); updateDashboardStats(); });
+}
+
+async function deleteCourse(id) {
+  if (!confirm("Are you sure you want to delete this course?")) return;
+  const response = await fetch(`/delete-course/${id}`, { method: "DELETE" });
+  const data = await response.json();
+  alert(data.message);
+  loadCourses();
+  updateDashboardStats();
+}
+
+var lineChart1Instance = null;
+var lineChart2Instance = null;
+
+function renderDashboardCharts(myCourses, enrollments) {
+  var emptyEl = document.getElementById("chartEmpty");
+  var rowEl = document.getElementById("chartsRow");
+  var hasData = myCourses && myCourses.length > 0;
+
+  if (emptyEl) emptyEl.style.display = hasData ? "none" : "flex";
+  if (rowEl) rowEl.style.display = hasData ? "grid" : "none";
+
+  if (lineChart1Instance) {
+    lineChart1Instance.destroy();
+    lineChart1Instance = null;
+  }
+  if (lineChart2Instance) {
+    lineChart2Instance.destroy();
+    lineChart2Instance = null;
+  }
+  if (!hasData) return;
+
+  var enrollList = Array.isArray(enrollments) ? enrollments : [];
+  var byCourse = {};
+  enrollList.forEach(function(e) {
+    var id = String(e.courseId || e.course || "");
+    if (!byCourse[id]) byCourse[id] = 0;
+    byCourse[id]++;
+  });
+  var labels = myCourses.map(function(c) { return c.title || "Course"; });
+  var data = myCourses.map(function(c) { return byCourse[String(c._id)] || 0; });
+
+  var fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  var gridColor = "rgba(0,0,0,0.06)";
+  var tickColor = "#475569";
+  var commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: { padding: { top: 8, right: 16, bottom: 8, left: 8 } },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: "#1e293b",
+        padding: 10,
+        titleFont: { size: 13, family: fontFamily },
+        bodyFont: { size: 13, family: fontFamily },
+        callbacks: {
+          title: function(items) {
+            return items[0] && items[0].label ? items[0].label : "";
+          },
+          label: function(ctx) {
+            var n = ctx.raw;
+            return n === 1 ? "1 student" : n + " students";
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: gridColor },
+        border: { display: false },
+        ticks: { color: tickColor, font: { size: 12, family: fontFamily }, maxRotation: 40, minRotation: 0 }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: { stepSize: 1, color: tickColor, font: { size: 12, family: fontFamily } },
+        grid: { color: gridColor },
+        border: { display: false }
+      }
+    }
+  };
+
+  var c1 = document.getElementById("lineChart1");
+  if (c1) {
+    lineChart1Instance = new Chart(c1, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Enrollments",
+          data: data,
+          borderColor: "#4f46e5",
+          backgroundColor: "rgba(79, 70, 229, 0.08)",
+          borderWidth: 2.5,
+          fill: false,
+          tension: 0.2,
+          pointBackgroundColor: "#4f46e5",
+          pointBorderColor: "#fff",
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: commonOptions
+    });
+  }
+
+  var c2 = document.getElementById("lineChart2");
+  if (c2) {
+    lineChart2Instance = new Chart(c2, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Students",
+          data: data,
+          borderColor: "#0d9488",
+          backgroundColor: "rgba(13, 148, 136, 0.15)",
+          borderWidth: 2.5,
+          fill: true,
+          tension: 0.2,
+          pointBackgroundColor: "#0d9488",
+          pointBorderColor: "#fff",
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: commonOptions
+    });
+  }
+}
+
+async function updateDashboardStats() {
+  try {
+    const [coursesRes, enrollRes] = await Promise.all([fetch("/courses"), fetch("/teacher/my-enrollments?email=" + encodeURIComponent(email))]);
+    const allCourses = await coursesRes.json();
+    const enrollments = await enrollRes.json();
+    const myCourses = Array.isArray(allCourses) ? allCourses.filter((c) => c.teacherEmail === email) : [];
+    document.getElementById("statCourses").textContent = myCourses.length;
+    document.getElementById("statEnrollments").textContent = Array.isArray(enrollments) ? enrollments.length : 0;
+    renderDashboardCharts(myCourses, enrollments);
+  } catch (_) {}
+}
+
+async function loadEnrollments() {
+  const res = await fetch("/teacher/my-enrollments?email=" + encodeURIComponent(email));
+  const data = await res.json();
+  const container = document.getElementById("enrollmentList");
+  container.innerHTML = "";
+  if (!data.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-text">No enrollments yet</div></div>';
+    return;
+  }
+  data.forEach(item => {
+    container.innerHTML += `
+      <div>
+        <p><strong>Student:</strong> ${item.email}</p>
+        <p><strong>Course:</strong> ${item.courseTitle}</p>
+      </div>`;
+  });
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+
+loadCourses();
+loadEnrollments();
+updateDashboardStats();
+  </script>
+</body>
+</html>

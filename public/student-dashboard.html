@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      min-height: 100vh;
+      color: #1a1a1a;
+      padding: 0;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 25px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      color: white;
+      font-size: 32px;
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .dashboard-wrapper {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .welcome-section {
+      margin-bottom: 40px;
+      padding: 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      color: white;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .welcome-section h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .welcome-section p {
+      font-size: 16px;
+      opacity: 0.95;
+    }
+
+    .assignments-section {
+      margin-bottom: 40px;
+    }
+    .assignment-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-left: 4px solid #667eea;
+    }
+    .assignment-card.assignment-overdue {
+      border-left-color: #dc3545;
+      background: #fff8f8;
+    }
+    .assignment-card .assignment-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+    }
+    .assignment-card .assignment-course {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .assignment-card .assignment-desc {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .assignment-card .due-date {
+      font-size: 14px;
+      font-weight: 600;
+      color: #475569;
+    }
+    .assignment-card .due-date.due-alert {
+      color: #dc3545;
+      font-weight: 700;
+    }
+    .assignment-card .due-date.due-alert::before {
+      content: "⚠ ";
+    }
+    .assignments-empty {
+      text-align: center;
+      padding: 24px;
+      color: #64748b;
+      font-size: 15px;
+      background: #f8fafc;
+      border-radius: 12px;
+    }
+    .assignments-empty .load-btn {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
+    }
+    .assignments-empty .load-btn:hover { opacity: 0.95; }
+    .assignments-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .assignments-header-row .btn-load {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .assignments-header-row .btn-load:hover { opacity: 0.95; }
+    .assignment-card .course-detail {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.5;
+      margin-top: 4px;
+      margin-bottom: 8px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border-left: 3px solid #667eea;
+    }
+    .assignment-card .submit-btn {
+      margin-top: 12px;
+      padding: 10px 20px;
+      font-size: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .assignment-card .submit-btn:hover { opacity: 0.95; }
+    .assignment-card .submitted-badge {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #059669;
+      font-weight: 600;
+    }
+    .assignment-card .marks-box {
+      margin-top: 10px;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border-radius: 10px;
+      border: 1px solid #10b981;
+      font-size: 15px;
+      font-weight: 700;
+      color: #047857;
+    }
+    .assignment-card .feedback-text {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #475569;
+      font-style: italic;
+    }
+    .assignment-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px 20px;
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-left: 4px solid #667eea;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .assignment-row:hover {
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+      transform: translateY(-1px);
+    }
+    .assignment-row.assignment-overdue { border-left-color: #dc3545; background: #fff8f8; }
+    .assignment-row .assignment-msg { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+    .assignment-row .assignment-msg .course-name { color: #667eea; }
+    .assignment-row .assignment-msg .due-date { font-size: 14px; font-weight: 500; color: #64748b; margin-left: 8px; }
+    .assignment-row .assignment-msg .due-date.due-alert { color: #dc3545; font-weight: 700; }
+    .assignment-row .assignment-msg .due-date.due-alert::before { content: "⚠ "; }
+    .assignment-row .click-hint { font-size: 13px; color: #64748b; }
+    .assignment-row.submitted .assignment-msg .course-name { color: #059669; }
+
+    .section-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    .course-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+
+    .course-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
+    }
+
+    .course-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: white;
+    }
+
+    .course-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .course-content {
+      padding: 24px;
+    }
+
+    .course-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .course-description {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      min-height: 60px;
+    }
+
+    .course-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-enroll {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+
+    .btn-enroll:hover {
+      box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-certificate {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-certificate:hover {
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-pdf {
+      background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+      color: white;
+    }
+
+    .btn-pdf:hover {
+      box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+
+    .btn-disabled {
+      background: #e0e0e0;
+      color: #999;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-disabled:hover {
+      transform: none;
+    }
+
+    .enrolled-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    .empty-state-text {
+      font-size: 18px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #667eea;
+      font-size: 18px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      header {
+        padding: 20px;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      header h1 {
+        font-size: 24px;
+      }
+
+      .dashboard-wrapper {
+        padding: 24px;
+        border-radius: 16px;
+      }
+
+      .courses-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .welcome-section {
+        padding: 20px;
+      }
+
+      .welcome-section h2 {
+        font-size: 22px;
+      }
+    }
+
+    /* Certificate Preview Modal */
+    .cert-preview-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .cert-preview-overlay.show {
+      display: flex;
+    }
+    .cert-preview-box {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 95vw;
+      width: 900px;
+      max-height: 95vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+      overflow: hidden;
+    }
+    .cert-preview-header {
+      padding: 18px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 18px;
+    }
+    .cert-preview-close {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 22px;
+      line-height: 1;
+      transition: background 0.2s;
+    }
+    .cert-preview-close:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .cert-preview-frame-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 20px;
+      background: #b0b8c4;
+    }
+    .cert-preview-frame-wrap iframe {
+      width: 100%;
+      min-height: 600px;
+      border: none;
+      background: white;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .cert-preview-actions {
+      padding: 16px 24px;
+      background: #f5f5f5;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cert-preview-actions .btn {
+      margin: 0;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🎓 Student Dashboard</h1>
+  <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+</header>
+
+<div class="container">
+  <div class="dashboard-wrapper">
+    
+    <div class="welcome-section">
+      <h2>Welcome back! 👋</h2>
+      <p id="welcomeText">Ready to continue your learning journey?</p>
+    </div>
+
+    <div class="assignments-section">
+      <div class="assignments-header-row">
+        <h2 class="section-title" style="margin-bottom:0;">📋 My Assignments</h2>
+        <button type="button" class="btn-load" onclick="loadAssignments()" title="Load or refresh your assignments">🔄 Load assignments</button>
+      </div>
+      <div id="assignmentsContainer">
+        <div class="loading">Loading assignments... ⏳</div>
+      </div>
+    </div>
+
+    <h2 class="section-title">📚 Available Courses</h2>
+    <div id="courseList" class="courses-grid">
+      <div class="loading">Loading courses... ⏳</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Submit Assignment Modal (load assignment: upload PDF or type answer) -->
+<div id="submitAssignmentModal" class="cert-preview-overlay">
+  <div class="cert-preview-box" style="max-width: 560px;">
+    <div class="cert-preview-header">
+      <span id="submitModalTitle">Submit Assignment</span>
+      <button type="button" class="cert-preview-close" onclick="closeSubmitModal()" aria-label="Close">&times;</button>
+    </div>
+    <div style="padding: 24px;">
+      <p id="submitModalCourse" style="color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 4px;"></p>
+      <p id="submitModalDue" style="color: rgba(255,255,255,0.85); font-size: 13px; margin-bottom: 20px;"></p>
+      <label style="display:block; font-weight:600; color:#334155; margin-bottom:8px;">📄 Upload your assignment (PDF)</label>
+      <input type="file" id="submitAssignmentFile" accept=".pdf,application/pdf" style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:16px;">
+      <label style="display:block; font-weight:600; color:#334155; margin-bottom:8px;">Or type your answer here</label>
+      <textarea id="submitAssignmentContent" rows="5" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-size:14px;" placeholder="Type your answer manually..."></textarea>
+      <button type="button" class="btn btn-enroll" onclick="submitAssignment()" style="margin-top:16px;">Submit to Teacher</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Modal (assessment before certificate) -->
+<div id="quizModal" class="cert-preview-overlay">
+  <div class="cert-preview-box" style="max-width: 560px;">
+    <div class="cert-preview-header">
+      <span>📝 Assessment – Score 50% to get certificate</span>
+      <button type="button" class="cert-preview-close" onclick="closeQuizModal()" aria-label="Close">&times;</button>
+    </div>
+    <div style="padding: 20px; max-height: 60vh; overflow-y: auto;">
+      <div id="quizQuestionsContainer"></div>
+      <button type="button" class="btn btn-certificate" id="quizSubmitBtn" onclick="submitQuiz()" style="margin-top: 16px;">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Certificate Preview Modal -->
+<div id="certPreviewModal" class="cert-preview-overlay">
+  <div class="cert-preview-box">
+    <div class="cert-preview-header">
+      <span>🏆 Certificate Preview</span>
+      <button type="button" class="cert-preview-close" onclick="closeCertificatePreview()" aria-label="Close">&times;</button>
+    </div>
+    <div class="cert-preview-frame-wrap">
+      <iframe id="certPreviewFrame" title="Certificate preview"></iframe>
+    </div>
+    <div class="cert-preview-actions">
+      <button type="button" class="btn btn-certificate" onclick="printCertificate()">🖨️ Print</button>
+      <button type="button" class="btn btn-enroll" onclick="downloadCertificatePdf()">📥 Download PDF</button>
+      <button type="button" class="btn btn-pdf" onclick="closeCertificatePreview()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const token = localStorage.getItem("token");
+const role = localStorage.getItem("userRole");
+
+if (!token || role !== "student") {
+  alert("Please login as a student ❌");
+  window.location.href = "login.html";
+}
+
+// Decode JWT to get email
+const decodedToken = JSON.parse(atob(token.split('.')[1]));
+const email = decodedToken.email;
+const userName = email.split("@")[0];
+
+// Update welcome text
+document.getElementById("welcomeText").textContent = `Hello ${userName.charAt(0).toUpperCase() + userName.slice(1)}! Ready to continue your learning journey?`;
+
+var submitModalAssignmentId = null;
+
+function fetchWithTimeout(url, options, ms) {
+  ms = ms || 15000;
+  var timeout = new Promise(function(_, reject) {
+    setTimeout(function() { reject(new Error("timeout")); }, ms);
+  });
+  return Promise.race([fetch(url, options), timeout]);
+}
+
+async function loadAssignments() {
+  var container = document.getElementById("assignmentsContainer");
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading assignments... ⏳</div>';
+
+  var assignments = [];
+  var submissions = [];
+  var errorMsg = "";
+
+  try {
+    var assignRes = await fetchWithTimeout("/student/assignments?email=" + encodeURIComponent(email || ""));
+    var contentType = (assignRes.headers.get("content-type") || "").toLowerCase();
+    var isJson = contentType.indexOf("application/json") !== -1;
+    if (!assignRes.ok) {
+      if (isJson) {
+        try {
+          var errBody = await assignRes.json();
+          errorMsg = errBody.message || errBody.error || ("Server error " + assignRes.status);
+        } catch (_) {
+          errorMsg = "Server error " + assignRes.status + ". Try again.";
+        }
+      } else {
+        errorMsg = "Server error " + assignRes.status + ". Try again.";
+      }
+    } else if (isJson) {
+      var data = await assignRes.json();
+      assignments = Array.isArray(data) ? data : [];
+    } else {
+      assignments = [];
+    }
+  } catch (e) {
+    if (e && e.message === "timeout") {
+      errorMsg = "Request timed out. Check your connection and try again.";
+    } else {
+      errorMsg = "Cannot reach server. Make sure the server is running (node server.js) and try again.";
+    }
+  }
+
+  try {
+    var subRes = await fetchWithTimeout("/student/my-submissions?email=" + encodeURIComponent(email || ""), {}, 8000);
+    if (subRes && subRes.ok) {
+      var subData = await subRes.json();
+      submissions = Array.isArray(subData) ? subData : [];
+    }
+  } catch (_) {
+    submissions = [];
+  }
+
+  var submissionByAssignmentId = {};
+  submissions.forEach(function(s) {
+    if (s && s.assignmentId) submissionByAssignmentId[String(s.assignmentId)] = s;
+  });
+
+  if (errorMsg) {
+    container.innerHTML = '<div class="assignments-empty">' + errorMsg + '<br><button type="button" class="load-btn" onclick="loadAssignments()">🔄 Load assignments</button></div>';
+    return;
+  }
+
+  if (!assignments.length) {
+    container.innerHTML = '<div class="assignments-empty">No assignments right now. Enroll in courses and your teacher will add assignments here.<br><button type="button" class="load-btn" onclick="loadAssignments()">🔄 Refresh</button></div>';
+    return;
+  }
+
+  var now = new Date();
+  var endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+  var html = "";
+  for (var i = 0; i < assignments.length; i++) {
+    var a = assignments[i];
+    if (!a) continue;
+    try {
+      var due = new Date(a.dueDate || 0);
+      var isOverdue = due.getTime() ? due < now : false;
+      var isDueToday = due.getTime() && due >= now && due <= endOfToday;
+      var dueAlert = isOverdue || isDueToday;
+      var dueText = isOverdue ? "OVERDUE – Due was " + due.toLocaleDateString(undefined, { dateStyle: "medium", timeStyle: "short" })
+        : isDueToday ? "Due today " + due.toLocaleTimeString(undefined, { timeStyle: "short" })
+        : due.getTime() ? "Due " + due.toLocaleDateString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "Due: —";
+      var titleEsc = (a.title || "").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      var courseName = a.courseName || a.courseTitle || "Course";
+      var courseEsc = (courseName + "").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      var aid = (a._id != null) ? String(a._id) : "";
+      var sub = submissionByAssignmentId[aid] || null;
+      var rowClass = "assignment-row" + (dueAlert ? " assignment-overdue" : "") + (sub ? " submitted" : "");
+      var clickHint = sub ? "✓ Submitted – click to resubmit or view" : "Click to load & submit assignment";
+      var dueClass = dueAlert ? "due-date due-alert" : "due-date";
+      var dueSafe = (dueText + "").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      html += '<div class="' + rowClass + '" data-aid="' + (aid + "").replace(/"/g, "&quot;") + '" data-atitle="' + titleEsc + '" data-acourse="' + courseEsc + '" data-duedate="' + dueSafe + '">' +
+        '<div class="assignment-msg">' +
+          '<span class="course-name">' + courseEsc + '</span>' +
+          '<span class="' + dueClass + '">' + dueText + '</span>' +
+        '</div>' +
+        '<span class="click-hint">' + clickHint + '</span>' +
+        (sub && sub.marks != null ? '<span style="font-weight:700; color:#059669;">Marks: ' + sub.marks + '</span>' : '') +
+        '</div>';
+    } catch (_) {}
+  }
+  container.innerHTML = html || '<div class="assignments-empty">No assignments to show.</div>';
+  container.querySelectorAll(".assignment-row").forEach(function(row) {
+    row.addEventListener("click", function() {
+      openSubmitModalFromRow(row);
+    });
+  });
+}
+
+function openSubmitModalFromRow(rowEl) {
+  var id = rowEl.getAttribute("data-aid");
+  var title = rowEl.getAttribute("data-atitle") || "";
+  var course = rowEl.getAttribute("data-acourse") || "";
+  var dueDate = rowEl.getAttribute("data-duedate") || "";
+  openSubmitModal(id, title, course, dueDate, "");
+}
+function openSubmitModal(assignmentId, assignmentTitle, courseName, dueDateText, existingContent) {
+  if (!assignmentId) return;
+  submitModalAssignmentId = assignmentId;
+  var titleEl = document.getElementById("submitModalTitle");
+  var courseEl = document.getElementById("submitModalCourse");
+  var dueEl = document.getElementById("submitModalDue");
+  if (titleEl) titleEl.textContent = (assignmentTitle || "Assignment");
+  if (courseEl) courseEl.textContent = "Course: " + (courseName || "");
+  if (dueEl) dueEl.textContent = dueDateText ? "Due: " + dueDateText : "";
+  var contentEl = document.getElementById("submitAssignmentContent");
+  var fileEl = document.getElementById("submitAssignmentFile");
+  if (contentEl) contentEl.value = existingContent || "";
+  if (fileEl) fileEl.value = "";
+  var modal = document.getElementById("submitAssignmentModal");
+  if (modal) modal.classList.add("show");
+}
+function closeSubmitModal() {
+  document.getElementById("submitAssignmentModal").classList.remove("show");
+  submitModalAssignmentId = null;
+}
+async function submitAssignment() {
+  if (!submitModalAssignmentId) return;
+  var contentEl = document.getElementById("submitAssignmentContent");
+  var fileInput = document.getElementById("submitAssignmentFile");
+  var content = contentEl ? contentEl.value.trim() : "";
+  var file = fileInput && fileInput.files && fileInput.files[0];
+  if (!content && !file) {
+    alert("Please upload a PDF or type your answer.");
+    return;
+  }
+  var url = "/student/assignment/" + encodeURIComponent(submitModalAssignmentId) + "/submit";
+  var res;
+  try {
+    if (file) {
+      var formData = new FormData();
+      formData.append("email", email);
+      formData.append("content", content);
+      formData.append("attachment", file);
+      res = await fetch(url, { method: "POST", body: formData });
+    } else {
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, content: content })
+      });
+    }
+    var data = await res.json().catch(function() { return {}; });
+    if (data._id || (data && data.assignmentId)) {
+      closeSubmitModal();
+      loadAssignments();
+      alert("Assignment submitted successfully. Teacher will review and give marks.");
+    } else {
+      alert(data.message || "Submit failed. Try again.");
+    }
+  } catch (err) {
+    alert("Network error. Please try again.");
+  }
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+
+async function loadCourses() {
+  try {
+    const container = document.getElementById("courseList");
+    
+    const courseRes = await fetch("/courses");
+    const courses = await courseRes.json();
+
+    const enrollRes = await fetch(`/my-courses/${email}`);
+    const enrolled = await enrollRes.json();
+
+    const enrolledIds = enrolled.map(e => e.courseId);
+
+    if (courses.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state" style="grid-column: 1/-1;">
+          <div class="empty-state-icon">📭</div>
+          <div class="empty-state-text">No courses available at the moment</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = courses.map(course => {
+      const isEnrolled = enrolledIds.includes(course._id);
+      
+      return `
+        <div class="course-card">
+          <div class="course-image">
+            ${course.image 
+              ? `<img src="/uploads/${course.image}" alt="${course.title}">` 
+              : `<div style="font-size: 64px;">📚</div>`
+            }
+          </div>
+          <div class="course-content">
+            ${isEnrolled ? '<span class="enrolled-badge">✅ Enrolled</span>' : ''}
+            <h3 class="course-title">${course.title}</h3>
+            <p class="course-description">${course.description || 'No description available'}</p>
+            
+            <div class="course-actions">
+              ${isEnrolled
+                ? `
+                  ${course.pdf 
+                    ? `<a href="/uploads/${course.pdf}" target="_blank" class="btn btn-pdf">📄 View PDF</a>` 
+                    : ''
+                  }
+                  ${course.scormPath 
+                    ? `<a href="/scorm-launch/${course.scormPath}" target="_blank" class="btn btn-pdf">📦 Open SCORM</a>` 
+                    : ''
+                  }
+                  <button class="btn btn-certificate" data-course-id="${course._id}" data-course-title="${String(course.title).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}" onclick="showCertificatePreview('${course._id}', this.getAttribute('data-course-title'))">
+                    🏆 Get Certificate
+                  </button>
+                `
+                : `
+                  <button class="btn btn-enroll" onclick="enroll('${course._id}','${course.title}')">
+                    🎓 Enroll Now
+                  </button>
+                `
+              }
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  } catch (error) {
+    console.error("Error loading courses:", error);
+    document.getElementById("courseList").innerHTML = `
+      <div class="empty-state" style="grid-column: 1/-1;">
+        <div class="empty-state-icon">❌</div>
+        <div class="empty-state-text">Error loading courses. Please refresh the page.</div>
+      </div>
+    `;
+  }
+}
+
+async function enroll(courseId, courseTitle) {
+  try {
+    const res = await fetch("/enroll", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        courseId,
+        courseTitle
+      })
+    });
+
+    const data = await res.json();
+    
+    // Show success message with better styling
+    if (data.message.includes("Successfully") || data.message.includes("Enrollment")) {
+      alert("✅ " + data.message);
+      await loadCourses();
+    } else {
+      alert("⚠️ " + data.message);
+    }
+  } catch (error) {
+    console.error("Error enrolling:", error);
+    alert("❌ Error enrolling in course. Please try again.");
+  }
+}
+
+var certificatePreviewCourseTitle = '';
+var certificatePreviewCourseId = '';
+
+async function showCertificatePreview(courseId, courseTitle) {
+  certificatePreviewCourseTitle = courseTitle;
+  certificatePreviewCourseId = courseId;
+  const res = await fetch('/api/certificate-eligible?email=' + encodeURIComponent(email) + '&courseId=' + encodeURIComponent(courseId));
+  const data = await res.json();
+  if (data.eligible) {
+    openCertificateModal();
+    return;
+  }
+  if (data.reason === 'take_quiz') {
+    openQuizModal(courseId, courseTitle);
+    return;
+  }
+  openCertificateModal();
+}
+
+function openCertificateModal() {
+  var previewUrl = '/certificate/' + encodeURIComponent(email) + '/' + encodeURIComponent(certificatePreviewCourseTitle);
+  document.getElementById('certPreviewFrame').src = previewUrl;
+  document.getElementById('certPreviewModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+var quizCourseId = '';
+var quizCourseTitle = '';
+
+async function openQuizModal(courseId, courseTitle) {
+  quizCourseId = courseId;
+  quizCourseTitle = courseTitle;
+  const res = await fetch('/api/course/' + courseId + '/questions');
+  const questions = await res.json();
+  const container = document.getElementById('quizQuestionsContainer');
+  if (!questions.length) {
+    container.innerHTML = '<p>No assessment for this course. You can get the certificate directly.</p>';
+    document.getElementById('quizSubmitBtn').style.display = 'none';
+    document.getElementById('quizModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+  document.getElementById('quizSubmitBtn').style.display = 'block';
+  const labels = ['A', 'B', 'C', 'D'];
+  container.innerHTML = questions.map((q, i) => {
+    const opts = (q.options || []).map((opt, j) =>
+      '<label style="display:block; margin:8px 0;"><input type="radio" name="q' + q._id + '" value="' + j + '"> ' + (opt || '') + '</label>'
+    ).join('');
+    return '<div style="margin-bottom:20px; padding:12px; background:#f8fafc; border-radius:8px;"><strong>Q' + (i + 1) + '.</strong> ' + (q.questionText || '') + '<div style="margin-top:8px;">' + opts + '</div></div>';
+  }).join('');
+  document.getElementById('quizModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeQuizModal() {
+  document.getElementById('quizModal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+async function submitQuiz() {
+  const container = document.getElementById('quizQuestionsContainer');
+  const inputs = container.querySelectorAll('input[type="radio"]:checked');
+  const byName = {};
+  inputs.forEach(inp => {
+    const name = inp.name;
+    if (name && name.startsWith('q')) byName[name] = parseInt(inp.value, 10);
+  });
+  const questions = await (await fetch('/api/course/' + quizCourseId + '/questions')).json();
+  const answers = questions.map(q => ({ questionId: q._id, selectedIndex: byName['q' + q._id] }));
+  const res = await fetch('/api/course/' + quizCourseId + '/submit-quiz', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, courseTitle: quizCourseTitle, answers })
+  });
+  const data = await res.json();
+  closeQuizModal();
+  if (data.passed) {
+    certificatePreviewCourseTitle = quizCourseTitle;
+    openCertificateModal();
+    alert('✅ ' + (data.message || 'You passed! Here is your certificate.'));
+  } else {
+    alert('❌ ' + (data.message || 'You are not capable. Please prepare and try again.') + ' (Score: ' + (data.percentage || 0) + '%)');
+  }
+}
+
+function closeCertificatePreview() {
+  document.getElementById('certPreviewModal').classList.remove('show');
+  document.getElementById('certPreviewFrame').src = 'about:blank';
+  document.body.style.overflow = '';
+}
+
+function printCertificate() {
+  var iframe = document.getElementById('certPreviewFrame');
+  try {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+  } catch (e) {
+    window.open(iframe.src, '_blank').print();
+  }
+}
+
+function downloadCertificatePdf() {
+  var url = '/certificate/' + encodeURIComponent(email) + '/' + encodeURIComponent(certificatePreviewCourseTitle) + '?print=1';
+  window.open(url, '_blank');
+}
+
+// Close certificate modal when clicking overlay background
+document.getElementById('certPreviewModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCertificatePreview();
+});
+
+// Load courses on page load
+document.addEventListener('DOMContentLoaded', function() {
+  loadCourses();
+  loadAssignments();
+});
+
+</script>
+
+</body>
+</html>

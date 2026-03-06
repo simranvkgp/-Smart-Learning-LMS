@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      min-height: 100vh;
+      color: #1a1a1a;
+      padding: 0;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    header {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 25px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      color: white;
+      font-size: 28px;
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      margin: 0;
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .admin-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin: 0 0 30px 0;
+      flex-wrap: wrap;
+      background: rgba(102, 126, 234, 0.1);
+      padding: 8px;
+      border-radius: 16px;
+    }
+
+    .tab-btn {
+      padding: 14px 28px;
+      background: transparent;
+      color: #667eea;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tab-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .tab-btn:hover::before {
+      left: 100%;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: rgba(102, 126, 234, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .tab-content {
+      display: none;
+      margin-top: 30px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .stat-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px 25px;
+      border-radius: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .stat-box::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      transition: transform 0.6s;
+    }
+
+    .stat-box:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    }
+
+    .stat-box:hover::before {
+      transform: rotate(180deg);
+    }
+
+    .stat-box h3 {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.95;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-box .number {
+      font-size: 42px;
+      font-weight: 800;
+      margin: 15px 0 0 0;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .users-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .user-card {
+      background: white;
+      padding: 24px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border-left: 5px solid #667eea;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .user-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s;
+    }
+
+    .user-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+    }
+
+    .user-card:hover::before {
+      width: 100%;
+      opacity: 0.05;
+    }
+
+    .user-card h4 {
+      margin: 0 0 12px 0;
+      color: #1a1a1a;
+      font-size: 18px;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+    }
+
+    .user-info {
+      font-size: 14px;
+      color: #666;
+      margin: 8px 0;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 12px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+    }
+
+    .role-badge.student {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      color: #155724;
+    }
+
+    .role-badge.teacher {
+      background: linear-gradient(135deg, #cfe2ff 0%, #b3d7ff 100%);
+      color: #084298;
+    }
+
+    .role-badge.admin {
+      background: linear-gradient(135deg, #f8d7da 0%, #f5c2c7 100%);
+      color: #842029;
+    }
+
+    .active-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .active-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      display: inline-block;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .last-login {
+      font-size: 12px;
+      color: #888;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .login-count {
+      font-size: 12px;
+      color: #667eea;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .course-card {
+      background: white;
+      padding: 28px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border-top: 5px solid;
+      border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .course-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+    }
+
+    .course-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
+    }
+
+    .course-card:hover::after {
+      transform: scaleX(1);
+    }
+
+    .course-card h4 {
+      margin: 0 0 15px 0;
+      color: #1a1a1a;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .course-info {
+      font-size: 14px;
+      color: #666;
+      margin: 10px 0;
+      line-height: 1.6;
+    }
+
+    .enrollments-list {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .enrollment-item {
+      padding: 20px 24px;
+      border-bottom: 1px solid #f0f0f0;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 20px;
+      align-items: center;
+      transition: all 0.3s;
+    }
+
+    .enrollment-item:hover {
+      background: rgba(102, 126, 234, 0.03);
+      transform: translateX(5px);
+    }
+
+    .enrollment-item:last-child {
+      border-bottom: none;
+    }
+
+    .enrollment-item h5 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .enrollment-item p {
+      margin: 3px 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .search-box {
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      max-width: 450px;
+      padding: 16px 20px 16px 50px;
+      border: 2px solid #e0e0e0;
+      border-radius: 16px;
+      font-size: 15px;
+      transition: all 0.3s;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .search-box::before {
+      content: '🔍';
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-edit, .btn-delete {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-edit {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+
+    .btn-edit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-edit:active {
+      transform: translateY(-1px);
+    }
+
+    .btn-delete {
+      background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+      color: white;
+    }
+
+    .btn-delete:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+
+    .btn-delete:active {
+      transform: translateY(-1px);
+    }
+
+    .enrollment-item {
+      grid-template-columns: 1fr 1fr 1fr auto;
+    }
+
+    .enrollment-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .enrollment-actions .btn-edit,
+    .enrollment-actions .btn-delete {
+      padding: 8px 14px;
+      font-size: 12px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      header {
+        padding: 20px;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      header h1 {
+        font-size: 22px;
+      }
+
+      .admin-container {
+        padding: 24px;
+        border-radius: 16px;
+      }
+
+      .tabs {
+        gap: 8px;
+        padding: 6px;
+      }
+
+      .tab-btn {
+        padding: 12px 16px;
+        font-size: 13px;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .users-grid,
+      .courses-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .enrollment-item {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 16px;
+      }
+
+      .enrollment-item > div {
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 8px;
+      }
+
+      .enrollment-item > div:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .modal-content {
+        padding: 24px;
+        margin: 10% auto;
+        width: 95%;
+      }
+
+      .search-box input {
+        max-width: 100%;
+      }
+    }
+
+    /* Loading Animation */
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .loading {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+      overflow: auto;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: white;
+      margin: 5% auto;
+      padding: 40px;
+      border-radius: 24px;
+      width: 90%;
+      max-width: 550px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      color: #1a1a1a;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .close {
+      color: #999;
+      font-size: 32px;
+      font-weight: 300;
+      cursor: pointer;
+      transition: all 0.3s;
+      line-height: 1;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .close:hover {
+      color: #1a1a1a;
+      background: #f0f0f0;
+      transform: rotate(90deg);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #1a1a1a;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 15px;
+      box-sizing: border-box;
+      transition: all 0.3s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #f0f0f0;
+    }
+
+    .btn-save, .btn-cancel {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-save:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-cancel {
+      background: #f0f0f0;
+      color: #666;
+    }
+
+    .btn-cancel:hover {
+      background: #e0e0e0;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>⚡ Admin Dashboard</h1>
+  <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+</header>
+
+<div class="container">
+  <div class="admin-container">
+    
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('stats', event)">📊 Dashboard</button>
+      <button class="tab-btn" onclick="switchTab('active', event)">🟢 Active Users</button>
+      <button class="tab-btn" onclick="switchTab('students', event)">👥 Students</button>
+      <button class="tab-btn" onclick="switchTab('teachers', event)">👨‍🏫 Teachers</button>
+      <button class="tab-btn" onclick="switchTab('courses', event)">📚 Courses</button>
+      <button class="tab-btn" onclick="switchTab('enrollments', event)">🎓 Enrollments</button>
+    </div>
+
+    <!-- TAB: Dashboard -->
+    <div id="stats" class="tab-content active">
+      <h2>📊 System Overview</h2>
+      <div class="stats-grid" id="statsGrid"></div>
+    </div>
+
+    <!-- TAB: Active Users -->
+    <div id="active" class="tab-content">
+      <h2>🟢 Recently Logged In Users</h2>
+      <div class="search-box">
+        <input type="text" id="activeSearch" placeholder="🔍 Search active users..." onkeyup="filterActiveUsers()">
+      </div>
+      <div class="users-grid" id="activeUsersList"></div>
+    </div>
+
+    <!-- TAB: Students -->
+    <div id="students" class="tab-content">
+      <h2>👥 All Students</h2>
+      <div class="search-box">
+        <input type="text" id="studentSearch" placeholder="🔍 Search students by email..." onkeyup="filterStudents()">
+      </div>
+      <div class="users-grid" id="studentsList"></div>
+    </div>
+
+    <!-- TAB: Teachers -->
+    <div id="teachers" class="tab-content">
+      <h2>👨‍🏫 All Teachers</h2>
+      <div class="search-box">
+        <input type="text" id="teacherSearch" placeholder="🔍 Search teachers by email..." onkeyup="filterTeachers()">
+      </div>
+      <div class="users-grid" id="teachersList"></div>
+    </div>
+
+    <!-- TAB: Courses -->
+    <div id="courses" class="tab-content">
+      <h2>📚 All Courses</h2>
+      <div class="courses-grid" id="coursesList"></div>
+    </div>
+
+    <!-- TAB: Enrollments -->
+    <div id="enrollments" class="tab-content">
+      <h2>🎓 Course Enrollments</h2>
+      <div class="enrollments-list" id="enrollmentsList"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Edit User Modal -->
+<div id="editUserModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>✏️ Edit User</h3>
+      <span class="close" onclick="closeModal('editUserModal')">&times;</span>
+    </div>
+    <form id="editUserForm" onsubmit="updateUser(event)">
+      <input type="hidden" id="editUserId" name="id">
+      <div class="form-group">
+        <label>Email:</label>
+        <input type="email" id="editUserEmail" name="email" required>
+      </div>
+      <div class="form-group">
+        <label>Name:</label>
+        <input type="text" id="editUserName" name="name">
+      </div>
+      <div class="form-group">
+        <label>Role:</label>
+        <select id="editUserRole" name="role" required>
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeModal('editUserModal')">Cancel</button>
+        <button type="submit" class="btn-save">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Course Modal -->
+<div id="editCourseModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>✏️ Edit Course</h3>
+      <span class="close" onclick="closeModal('editCourseModal')">&times;</span>
+    </div>
+    <form id="editCourseForm" onsubmit="updateCourse(event)" enctype="multipart/form-data">
+      <input type="hidden" id="editCourseId" name="id">
+      <div class="form-group">
+        <label>Title:</label>
+        <input type="text" id="editCourseTitle" name="title" required>
+      </div>
+      <div class="form-group">
+        <label>Description:</label>
+        <textarea id="editCourseDescription" name="description" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>PDF File (optional):</label>
+        <input type="file" id="editCoursePdf" name="pdf" accept=".pdf">
+      </div>
+      <div class="form-group">
+        <label>Image File (optional):</label>
+        <input type="file" id="editCourseImage" name="image" accept="image/*">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeModal('editCourseModal')">Cancel</button>
+        <button type="submit" class="btn-save">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Enrollment Modal -->
+<div id="editEnrollmentModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>✏️ Edit Enrollment</h3>
+      <span class="close" onclick="closeModal('editEnrollmentModal')">&times;</span>
+    </div>
+    <form id="editEnrollmentForm" onsubmit="updateEnrollment(event)">
+      <input type="hidden" id="editEnrollmentId" name="id">
+      <div class="form-group">
+        <label>Student Email:</label>
+        <input type="email" id="editEnrollmentEmail" name="email" required>
+      </div>
+      <div class="form-group">
+        <label>Course Title:</label>
+        <input type="text" id="editEnrollmentCourseTitle" name="courseTitle" required>
+      </div>
+      <div class="form-group">
+        <label>Course ID:</label>
+        <input type="text" id="editEnrollmentCourseId" name="courseId" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeModal('editEnrollmentModal')">Cancel</button>
+        <button type="submit" class="btn-save">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+
+const token = localStorage.getItem("token");
+const role = localStorage.getItem("userRole");
+
+if (!token || role !== "admin") {
+  alert("Admin access only ❌");
+  window.location.href = "login.html";
+}
+
+// Decode JWT to get email
+const decodedToken = JSON.parse(atob(token.split('.')[1]));
+const email = decodedToken.email;
+
+let allStudents = [];
+let allTeachers = [];
+let allCourses = [];
+let allEnrollments = [];
+let allActiveUsers = [];
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+
+function switchTab(tabName, event) {
+  try {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    // Show selected tab
+    const tabContent = document.getElementById(tabName);
+    if (!tabContent) {
+      console.error("Tab content not found:", tabName);
+      return;
+    }
+    tabContent.classList.add('active');
+    
+    // Mark button as active
+    if (event && event.target) {
+      event.target.classList.add('active');
+    } else {
+      // Fallback: find button by data attribute or text content
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabName || 
+            btn.textContent.includes(tabName === 'stats' ? 'Dashboard' : 
+                                    tabName === 'active' ? 'Active' :
+                                    tabName === 'students' ? 'Students' :
+                                    tabName === 'teachers' ? 'Teachers' :
+                                    tabName === 'courses' ? 'Courses' :
+                                    tabName === 'enrollments' ? 'Enrollments' : '')) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    // Load data for selected tab
+    if (tabName === 'stats') loadStats();
+    else if (tabName === 'active') loadActiveUsers();
+    else if (tabName === 'students') loadStudents();
+    else if (tabName === 'teachers') loadTeachers();
+    else if (tabName === 'courses') loadCourses();
+    else if (tabName === 'enrollments') loadEnrollments();
+  } catch (error) {
+    console.error("Error switching tab:", error);
+    alert("Error switching tab. Please refresh the page.");
+  }
+}
+
+// Load Dashboard Stats
+async function loadStats() {
+  try {
+    const users = await (await fetch("/admin/users")).json();
+    const courses = await (await fetch("/courses")).json();
+    const enrollments = await (await fetch("/admin/enrollments")).json();
+
+  const students = users.filter(u => u.role === "student");
+  const teachers = users.filter(u => u.role === "teacher");
+  const activeUsers = users.filter(u => u.isActive === true);
+  const recentLogins = users.filter(u => u.lastLogin !== null).length;
+
+  document.getElementById("statsGrid").innerHTML = `
+    <div class="stat-box" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+      <h3>🟢 Active Users</h3>
+      <div class="number">${activeUsers.length}</div>
+    </div>
+    <div class="stat-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+      <h3>👥 Total Users</h3>
+      <div class="number">${users.length}</div>
+    </div>
+    <div class="stat-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+      <h3>🎓 Students</h3>
+      <div class="number">${students.length}</div>
+    </div>
+    <div class="stat-box" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+      <h3>👨‍🏫 Teachers</h3>
+      <div class="number">${teachers.length}</div>
+    </div>
+    <div class="stat-box" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+      <h3>📚 Total Courses</h3>
+      <div class="number">${courses.length}</div>
+    </div>
+    <div class="stat-box" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+      <h3>✅ Total Enrollments</h3>
+      <div class="number">${enrollments.length}</div>
+    </div>
+    <div class="stat-box" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+      <h3>🔐 Recent Logins</h3>
+      <div class="number">${recentLogins}</div>
+    </div>
+  `;
+  } catch (error) {
+    console.error("Error loading stats:", error);
+    document.getElementById("statsGrid").innerHTML = `<div style="padding: 20px; text-align: center; color: #dc3545;">Error loading statistics. Please refresh the page.</div>`;
+  }
+}
+
+// Load All Students
+async function loadStudents() {
+  try {
+    const users = await (await fetch("/admin/users")).json();
+    const enrollments = await (await fetch("/admin/enrollments")).json();
+    
+    allStudents = users.filter(u => u.role === "student");
+    displayStudents(allStudents);
+  } catch (error) {
+    console.error("Error loading students:", error);
+    document.getElementById("studentsList").innerHTML = `<div style="padding: 20px; text-align: center; color: #dc3545;">Error loading students. Please refresh the page.</div>`;
+  }
+}
+
+// Load Active Users
+async function loadActiveUsers() {
+  try {
+    const users = await (await fetch("/admin/users")).json();
+    // Sort by lastLogin (most recent first), filter those who have logged in
+    allActiveUsers = users
+      .filter(u => u.lastLogin !== null)
+      .sort((a, b) => new Date(b.lastLogin) - new Date(a.lastLogin));
+    displayActiveUsers(allActiveUsers);
+  } catch (error) {
+    console.error("Error loading active users:", error);
+    document.getElementById("activeUsersList").innerHTML = `<div style="padding: 20px; text-align: center; color: #dc3545;">Error loading active users. Please refresh the page.</div>`;
+  }
+}
+
+function displayActiveUsers(users) {
+  const container = document.getElementById("activeUsersList");
+  if (users.length === 0) {
+    container.innerHTML = "<div style='grid-column: 1/-1; text-align: center; padding: 60px;'><div style='font-size: 48px; margin-bottom: 20px;'>😴</div><p style='color: #999; font-size: 16px;'>No users have logged in yet</p></div>";
+    return;
+  }
+  
+  container.innerHTML = users.map(user => {
+    const userEnrollments = allEnrollments.filter(e => e.email === user.email);
+    const lastLoginDate = user.lastLogin ? new Date(user.lastLogin) : null;
+    const timeAgo = lastLoginDate ? getTimeAgo(lastLoginDate) : 'Never';
+    const isCurrentlyActive = user.isActive;
+    
+    return `
+      <div class="user-card" style="border-left-color: ${isCurrentlyActive ? '#28a745' : '#667eea'};">
+        <h4>👤 ${user.email || user.name || 'N/A'}</h4>
+        ${user.name ? `<div class="user-info"><strong>Name:</strong> ${user.name}</div>` : ''}
+        <div class="user-info"><strong>Email:</strong> ${user.email}</div>
+        <div class="user-info"><strong>Role:</strong> ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</div>
+        ${isCurrentlyActive ? '<span class="active-badge">🟢 Currently Active</span>' : ''}
+        <div class="last-login">🕐 Last Login: ${timeAgo}</div>
+        ${user.loginCount ? `<div class="login-count">📊 Total Logins: ${user.loginCount}</div>` : ''}
+        ${user.role === 'student' ? `<div class="user-info"><strong>Enrolled Courses:</strong> ${userEnrollments.length}</div>` : ''}
+        <span class="role-badge ${user.role}">${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
+        <div class="action-buttons">
+          <button class="btn-edit" onclick="openEditUserModal('${user._id}')">✏️ Edit</button>
+          <button class="btn-delete" onclick="deleteUser('${user._id}', '${user.email}')">🗑️ Delete</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diff = now - date;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  
+  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  return 'Just now';
+}
+
+function filterActiveUsers() {
+  const search = document.getElementById("activeSearch").value.toLowerCase();
+  const filtered = allActiveUsers.filter(u => 
+    (u.email && u.email.toLowerCase().includes(search)) ||
+    (u.name && u.name.toLowerCase().includes(search))
+  );
+  displayActiveUsers(filtered);
+}
+
+function displayStudents(students) {
+  const container = document.getElementById("studentsList");
+  container.innerHTML = students.map(student => {
+    const studentEnrollments = allEnrollments.filter(e => e.email === student.email);
+    const lastLoginDate = student.lastLogin ? new Date(student.lastLogin) : null;
+    const timeAgo = lastLoginDate ? getTimeAgo(lastLoginDate) : 'Never';
+    const isActive = student.isActive;
+    
+    return `
+      <div class="user-card" style="border-left-color: ${isActive ? '#28a745' : '#667eea'};">
+        <h4>👤 ${student.email || student.name || 'N/A'}</h4>
+        ${student.name ? `<div class="user-info"><strong>Name:</strong> ${student.name}</div>` : ''}
+        <div class="user-info"><strong>Email:</strong> ${student.email}</div>
+        <div class="user-info"><strong>Enrolled Courses:</strong> ${studentEnrollments.length}</div>
+        <div class="user-info"><strong>Courses:</strong> ${studentEnrollments.map(e => e.courseTitle).join(", ") || "None"}</div>
+        ${isActive ? '<span class="active-badge">🟢 Active</span>' : ''}
+        ${lastLoginDate ? `<div class="last-login">🕐 Last Login: ${timeAgo}</div>` : '<div class="last-login">🕐 Never logged in</div>'}
+        ${student.loginCount ? `<div class="login-count">📊 Logins: ${student.loginCount}</div>` : ''}
+        <span class="role-badge student">Student</span>
+        <div class="action-buttons">
+          <button class="btn-edit" onclick="openEditUserModal('${student._id}')">✏️ Edit</button>
+          <button class="btn-delete" onclick="deleteUser('${student._id}', '${student.email}')">🗑️ Delete</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function filterStudents() {
+  const search = document.getElementById("studentSearch").value.toLowerCase();
+  const filtered = allStudents.filter(s => s.email.toLowerCase().includes(search));
+  displayStudents(filtered);
+}
+
+// Load All Teachers
+async function loadTeachers() {
+  try {
+    const users = await (await fetch("/admin/users")).json();
+    const courses = await (await fetch("/courses")).json();
+    
+    allTeachers = users.filter(u => u.role === "teacher");
+    displayTeachers(allTeachers, courses);
+  } catch (error) {
+    console.error("Error loading teachers:", error);
+    document.getElementById("teachersList").innerHTML = `<div style="padding: 20px; text-align: center; color: #dc3545;">Error loading teachers. Please refresh the page.</div>`;
+  }
+}
+
+function displayTeachers(teachers, courses) {
+  const container = document.getElementById("teachersList");
+  container.innerHTML = teachers.map(teacher => {
+    const lastLoginDate = teacher.lastLogin ? new Date(teacher.lastLogin) : null;
+    const timeAgo = lastLoginDate ? getTimeAgo(lastLoginDate) : 'Never';
+    const isActive = teacher.isActive;
+    
+    return `
+      <div class="user-card" style="border-left-color: ${isActive ? '#28a745' : '#667eea'};">
+        <h4>👨‍🏫 ${teacher.email || teacher.name || 'N/A'}</h4>
+        ${teacher.name ? `<div class="user-info"><strong>Name:</strong> ${teacher.name}</div>` : ''}
+        <div class="user-info"><strong>Email:</strong> ${teacher.email}</div>
+        <div class="user-info"><strong>Total Courses:</strong> ${courses.length}</div>
+        ${isActive ? '<span class="active-badge">🟢 Active</span>' : ''}
+        ${lastLoginDate ? `<div class="last-login">🕐 Last Login: ${timeAgo}</div>` : '<div class="last-login">🕐 Never logged in</div>'}
+        ${teacher.loginCount ? `<div class="login-count">📊 Logins: ${teacher.loginCount}</div>` : ''}
+        <span class="role-badge teacher">Teacher</span>
+        <div class="action-buttons">
+          <button class="btn-edit" onclick="openEditUserModal('${teacher._id}')">✏️ Edit</button>
+          <button class="btn-delete" onclick="deleteUser('${teacher._id}', '${teacher.email}')">🗑️ Delete</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function filterTeachers() {
+  const search = document.getElementById("teacherSearch").value.toLowerCase();
+  const filtered = allTeachers.filter(t => t.email.toLowerCase().includes(search));
+  fetch("/courses").then(r => r.json()).then(courses => displayTeachers(filtered, courses));
+}
+
+// Load All Courses
+async function loadCourses() {
+  try {
+    allCourses = await (await fetch("/courses")).json();
+    const container = document.getElementById("coursesList");
+    container.innerHTML = allCourses.map(course => `
+    <div class="course-card">
+      <h4>📚 ${course.title}</h4>
+      <div class="course-info"><strong>Description:</strong> ${course.description}</div>
+      <div class="course-info"><strong>Course ID:</strong> ${course._id}</div>
+      ${course.pdf ? `<div class="course-info"><strong>PDF:</strong> ✓</div>` : ""}
+      ${course.image ? `<div class="course-info"><strong>Image:</strong> ✓</div>` : ""}
+      ${course.scormPath ? `<div class="course-info"><strong>SCORM:</strong> ✓</div>` : ""}
+      <div class="action-buttons">
+        <button class="btn-edit" onclick="openEditCourseModal('${course._id}')">✏️ Edit</button>
+        <button class="btn-delete" onclick="deleteCourse('${course._id}', '${course.title}')">🗑️ Delete</button>
+      </div>
+    </div>
+  `).join("");
+  } catch (error) {
+    console.error("Error loading courses:", error);
+    document.getElementById("coursesList").innerHTML = `<div style="padding: 20px; text-align: center; color: #dc3545;">Error loading courses. Please refresh the page.</div>`;
+  }
+}
+
+// Load All Enrollments
+async function loadEnrollments() {
+  try {
+    allEnrollments = await (await fetch("/admin/enrollments")).json();
+    const container = document.getElementById("enrollmentsList");
+  
+  if (allEnrollments.length === 0) {
+    container.innerHTML = "<div style='padding: 60px 20px; text-align: center;'><div style='font-size: 48px; margin-bottom: 20px;'>📭</div><p style='color: #999; font-size: 16px;'>No enrollments yet</p></div>";
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="padding: 20px 24px; border-bottom: 2px solid #e0e0e0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 20px; border-radius: 20px 20px 0 0;">
+      <div>Student Email</div>
+      <div>Course Title</div>
+      <div>Enrollment Date</div>
+      <div>Actions</div>
+    </div>
+    ${allEnrollments.map(enroll => `
+      <div class="enrollment-item">
+        <div><h5>${enroll.email}</h5></div>
+        <div><h5>${enroll.courseTitle}</h5></div>
+        <div><p>${new Date(enroll.createdAt || "").toLocaleDateString() || "N/A"}</p></div>
+        <div class="enrollment-actions">
+          <button class="btn-edit" onclick="openEditEnrollmentModal('${enroll._id}')">✏️</button>
+          <button class="btn-delete" onclick="deleteEnrollment('${enroll._id}', '${enroll.email}', '${enroll.courseTitle}')">🗑️</button>
+        </div>
+      </div>
+    `).join("")}
+  `;
+  } catch (error) {
+    console.error("Error loading enrollments:", error);
+    document.getElementById("enrollmentsList").innerHTML = `<div style="padding: 20px; text-align: center; color: #dc3545;">Error loading enrollments. Please refresh the page.</div>`;
+  }
+}
+
+// Initial load - Load all data on page load
+async function initializeAllData() {
+  try {
+    console.log("Initializing admin dashboard...");
+    // Load enrollments
+    allEnrollments = await (await fetch("/admin/enrollments")).json();
+    
+    // Load all data
+    await loadStats();
+    await loadActiveUsers();
+    await loadStudents();
+    await loadTeachers();
+    await loadCourses();
+    await loadEnrollments();
+    console.log("Dashboard initialized successfully");
+  } catch (error) {
+    console.error("Error initializing dashboard:", error);
+    alert("Error loading dashboard data. Please check the console for details and refresh the page.");
+  }
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeAllData();
+});
+
+// =========================
+// MODAL FUNCTIONS
+// =========================
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = "none";
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  const modals = document.querySelectorAll('.modal');
+  modals.forEach(modal => {
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  });
+}
+
+// =========================
+// USER FUNCTIONS
+// =========================
+async function openEditUserModal(userId) {
+  const user = [...allStudents, ...allTeachers].find(u => u._id === userId);
+  if (!user) {
+    // Fetch user if not in local arrays
+    const response = await fetch(`/admin/users`);
+    const users = await response.json();
+    const foundUser = users.find(u => u._id === userId);
+    if (foundUser) {
+      document.getElementById("editUserId").value = foundUser._id;
+      document.getElementById("editUserEmail").value = foundUser.email || "";
+      document.getElementById("editUserName").value = foundUser.name || "";
+      document.getElementById("editUserRole").value = foundUser.role || "student";
+      document.getElementById("editUserModal").style.display = "block";
+    }
+  } else {
+    document.getElementById("editUserId").value = user._id;
+    document.getElementById("editUserEmail").value = user.email || "";
+    document.getElementById("editUserName").value = user.name || "";
+    document.getElementById("editUserRole").value = user.role || "student";
+    document.getElementById("editUserModal").style.display = "block";
+  }
+}
+
+async function updateUser(event) {
+  event.preventDefault();
+  const userId = document.getElementById("editUserId").value;
+  const email = document.getElementById("editUserEmail").value;
+  const name = document.getElementById("editUserName").value;
+  const role = document.getElementById("editUserRole").value;
+
+  try {
+    const response = await fetch(`/admin/user/${userId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, name, role })
+    });
+
+    const result = await response.json();
+    alert(result.message);
+    
+    if (result.message.includes("successfully")) {
+      closeModal("editUserModal");
+      // Reload data
+      await loadStudents();
+      await loadTeachers();
+      await loadStats();
+    }
+  } catch (error) {
+    alert("Update failed ❌");
+  }
+}
+
+async function deleteUser(userId, userEmail) {
+  if (!confirm(`Are you sure you want to delete user: ${userEmail}?\n\nThis will also delete all their enrollments!`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/admin/user/${userId}`, {
+      method: "DELETE"
+    });
+
+    const result = await response.json();
+    alert(result.message);
+    
+    if (result.message.includes("successfully")) {
+      // Reload data
+      await loadStudents();
+      await loadTeachers();
+      await loadStats();
+      await loadEnrollments();
+    }
+  } catch (error) {
+    alert("Delete failed ❌");
+  }
+}
+
+// =========================
+// COURSE FUNCTIONS
+// =========================
+async function openEditCourseModal(courseId) {
+  const course = allCourses.find(c => c._id === courseId);
+  if (course) {
+    document.getElementById("editCourseId").value = course._id;
+    document.getElementById("editCourseTitle").value = course.title || "";
+    document.getElementById("editCourseDescription").value = course.description || "";
+    document.getElementById("editCourseModal").style.display = "block";
+  }
+}
+
+async function updateCourse(event) {
+  event.preventDefault();
+  const courseId = document.getElementById("editCourseId").value;
+  const title = document.getElementById("editCourseTitle").value;
+  const description = document.getElementById("editCourseDescription").value;
+  const pdfFile = document.getElementById("editCoursePdf").files[0];
+  const imageFile = document.getElementById("editCourseImage").files[0];
+
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("description", description);
+  if (pdfFile) formData.append("pdf", pdfFile);
+  if (imageFile) formData.append("image", imageFile);
+
+  try {
+    const response = await fetch(`/admin/course/${courseId}`, {
+      method: "PUT",
+      body: formData
+    });
+
+    const result = await response.json();
+    alert(result.message);
+    
+    if (result.message.includes("successfully")) {
+      closeModal("editCourseModal");
+      // Reset file inputs
+      document.getElementById("editCoursePdf").value = "";
+      document.getElementById("editCourseImage").value = "";
+      // Reload data
+      await loadCourses();
+      await loadStats();
+    }
+  } catch (error) {
+    alert("Update failed ❌");
+  }
+}
+
+async function deleteCourse(courseId, courseTitle) {
+  if (!confirm(`Are you sure you want to delete course: "${courseTitle}"?\n\nThis will also delete all enrollments for this course!`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/admin/course/${courseId}`, {
+      method: "DELETE"
+    });
+
+    const result = await response.json();
+    alert(result.message);
+    
+    if (result.message.includes("successfully")) {
+      // Reload data
+      await loadCourses();
+      await loadStats();
+      await loadEnrollments();
+    }
+  } catch (error) {
+    alert("Delete failed ❌");
+  }
+}
+
+// =========================
+// ENROLLMENT FUNCTIONS
+// =========================
+async function openEditEnrollmentModal(enrollmentId) {
+  const enrollment = allEnrollments.find(e => e._id === enrollmentId);
+  if (enrollment) {
+    document.getElementById("editEnrollmentId").value = enrollment._id;
+    document.getElementById("editEnrollmentEmail").value = enrollment.email || "";
+    document.getElementById("editEnrollmentCourseTitle").value = enrollment.courseTitle || "";
+    document.getElementById("editEnrollmentCourseId").value = enrollment.courseId || "";
+    document.getElementById("editEnrollmentModal").style.display = "block";
+  }
+}
+
+async function updateEnrollment(event) {
+  event.preventDefault();
+  const enrollmentId = document.getElementById("editEnrollmentId").value;
+  const email = document.getElementById("editEnrollmentEmail").value;
+  const courseTitle = document.getElementById("editEnrollmentCourseTitle").value;
+  const courseId = document.getElementById("editEnrollmentCourseId").value;
+
+  try {
+    const response = await fetch(`/admin/enrollment/${enrollmentId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, courseTitle, courseId })
+    });
+
+    const result = await response.json();
+    alert(result.message);
+    
+    if (result.message.includes("successfully")) {
+      closeModal("editEnrollmentModal");
+      // Reload data
+      await loadEnrollments();
+      await loadStudents();
+      await loadStats();
+    }
+  } catch (error) {
+    alert("Update failed ❌");
+  }
+}
+
+async function deleteEnrollment(enrollmentId, email, courseTitle) {
+  if (!confirm(`Are you sure you want to delete enrollment:\n\nStudent: ${email}\nCourse: ${courseTitle}`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/admin/enrollment/${enrollmentId}`, {
+      method: "DELETE"
+    });
+
+    const result = await response.json();
+    alert(result.message);
+    
+    if (result.message.includes("successfully")) {
+      // Reload data
+      await loadEnrollments();
+      await loadStudents();
+      await loadStats();
+    }
+  } catch (error) {
+    alert("Delete failed ❌");
+  }
+}
+
+</script>
+
+</div>
+</body>
+</html>
