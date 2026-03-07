@@ -30,25 +30,33 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public")); // serves dashboard.html, student-dashboard.html etc
 
 // ===== MONGODB CONNECTION =====
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("MongoDB Connected ✅"))
-.catch((err) => console.log("MongoDB Error:", err));
+const mongoUri = process.env.MONGO_URI;
+if (mongoUri) {
+  mongoose.connect(mongoUri)
+    .then(() => console.log("MongoDB Connected ✅"))
+    .catch((err) => console.log("MongoDB Error:", err));
+} else {
+  console.warn("MONGO_URI not set – set it in Vercel Environment Variables for the app to work.");
+}
 
 // ===== UPLOAD FOLDER SETUP =====
-const uploadDir = path.join(__dirname, "public", "uploads");
+// On Vercel, filesystem is read-only except /tmp; use /tmp for uploads there
+const isVercel = Boolean(process.env.VERCEL);
+const uploadBase = isVercel ? path.join("/tmp", "uploads") : path.join(__dirname, "public", "uploads");
+const uploadDir = uploadBase;
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+function safeMkdir(dir) {
+  try {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  } catch (e) {
+    console.warn("Could not create upload dir (e.g. read-only fs):", dir, e.message);
+  }
 }
-
-const scormDir = path.join(__dirname, "public", "uploads", "scorm");
-if (!fs.existsSync(scormDir)) {
-  fs.mkdirSync(scormDir, { recursive: true });
-}
-const assignmentsUploadDir = path.join(__dirname, "public", "uploads", "assignments");
-if (!fs.existsSync(assignmentsUploadDir)) {
-  fs.mkdirSync(assignmentsUploadDir, { recursive: true });
-}
+safeMkdir(uploadDir);
+const scormDir = path.join(uploadBase, "scorm");
+safeMkdir(scormDir);
+const assignmentsUploadDir = path.join(uploadBase, "assignments");
+safeMkdir(assignmentsUploadDir);
 
 // ===== MULTER (FILE UPLOAD) =====
 const storage = multer.diskStorage({
@@ -1253,8 +1261,17 @@ app.use((err, req, res, next) => {
 });
 
 // =========================
-// SERVER START
+// SERVER START (skip on Vercel – runs as serverless function there)
 // =========================
-app.listen(5000, () => {
-  console.log("🚀 LMS Server Running on http://localhost:5000");
-});
+const PORT = Number(process.env.PORT) || 5000;
+const HOST = process.env.HOST || "0.0.0.0";
+
+if (!process.env.VERCEL) {
+  app.listen(PORT, HOST, () => {
+    const local = `http://localhost:${PORT}`;
+    const network = HOST === "0.0.0.0" ? ` http://<this-machine-ip>:${PORT}` : "";
+    console.log(`🚀 LMS Server running at ${local}${network}`);
+  });
+}
+
+module.exports = app;
