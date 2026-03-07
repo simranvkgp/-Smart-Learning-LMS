@@ -441,11 +441,18 @@ registerForm.addEventListener("submit", async function(e) {
       body: JSON.stringify({ email, password, role })
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (_) {
+      setLoading(false);
+      const text = await response.text();
+      showError(response.ok ? "Invalid response from server." : "Server error: " + (response.status === 404 ? "API not found. Is the app deployed correctly?" : response.status + " " + (text || response.statusText)));
+      return;
+    }
 
-    if (data.message && data.message.includes("Successfully")) {
+    if (response.ok && data.message && data.message.includes("Successfully")) {
       showSuccess("Registration successful! Redirecting to login...");
-      
       setTimeout(() => {
         window.location.href = "index.html";
       }, 1500);
@@ -456,7 +463,7 @@ registerForm.addEventListener("submit", async function(e) {
   } catch (error) {
     setLoading(false);
     console.error("Registration error:", error);
-    showError("Network error. Please try again.");
+    showError("Network error. Check your connection and try again. " + (error.message || ""));
   }
 });
 

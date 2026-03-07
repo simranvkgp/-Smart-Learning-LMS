@@ -347,16 +347,20 @@ loginForm.addEventListener("submit", async function(e) {
       body: JSON.stringify({ email, password })
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (_) {
+      setLoading(false);
+      const text = await response.text();
+      showError(response.ok ? "Invalid response from server." : "Server error: " + (response.status === 404 ? "API not found. Is the app deployed correctly?" : response.status + " " + (text || response.statusText)));
+      return;
+    }
 
     if (data.token) {
-      // Store JWT token
       localStorage.setItem("token", data.token);
       localStorage.setItem("userRole", data.role);
-
       showSuccess("Login successful! Redirecting...");
-
-      // Redirect based on role
       setTimeout(() => {
         if (data.role === "admin") {
           window.location.href = "admin-dashboard.html";
@@ -373,7 +377,7 @@ loginForm.addEventListener("submit", async function(e) {
   } catch (error) {
     setLoading(false);
     console.error("Login error:", error);
-    showError("Network error. Please try again.");
+    showError("Network error. Check your connection and try again. " + (error.message || ""));
   }
 });
 
