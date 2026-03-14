@@ -1292,6 +1292,11 @@ if (!process.env.VERCEL) {
       console.warn("MongoDB not connected – login/register may fail until DB is available.");
       startServer();
     });
+} else {
+  // Vercel serverless: connect to MongoDB when the function loads so /login and /register work
+  if (mongoUri) {
+    connectDb().catch((err) => console.error("MongoDB connect error (Vercel):", err.message || err));
+  }
 }
 
 module.exports = app;
