@@ -89,7 +89,12 @@ app.get("/", (req, res) => {
 // =========================
 app.post("/register", async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    // Ensure DB is connected (important on Vercel serverless)
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ message: "Database not connected. Please try again in a moment." });
+    }
+
+    const { email, password, role } = req.body || {};
 
     if (!email || !password) {
       return res.json({ message: "All fields required ❌" });
@@ -112,8 +117,11 @@ app.post("/register", async (req, res) => {
     res.json({ message: "Registration Successful 🎉" });
 
   } catch (error) {
-    console.log(error);
-    res.json({ message: "Registration Failed ❌" });
+    console.error("Register error:", error);
+    const msg = error.name === "MongoError" || error.name === "MongoServerError"
+      ? "Database error. Check MONGO_URI and network."
+      : "Registration failed. Please try again.";
+    res.status(500).json({ message: msg });
   }
 });
 
@@ -123,13 +131,21 @@ app.post("/register", async (req, res) => {
 // =========================
 app.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ message: "Database not connected. Please try again in a moment." });
+    }
+
+    const { email, password } = req.body || {};
 
     const user = await User.findOne({ email });
     if (!user) return res.json({ message: "User not found ❌" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.json({ message: "Invalid Password ❌" });
+
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ message: "Server misconfigured (JWT). Contact support." });
+    }
 
     const token = jwt.sign(
       { id: user._id, role: user.role, email: user.email },
@@ -140,7 +156,11 @@ app.post("/login", async (req, res) => {
     res.json({ token, role: user.role });
 
   } catch (error) {
-    res.json({ message: "Login Failed ❌" });
+    console.error("Login error:", error);
+    const msg = error.name === "MongoError" || error.name === "MongoServerError"
+      ? "Database error. Check MONGO_URI and network."
+      : "Login failed. Please try again.";
+    res.status(500).json({ message: msg });
   }
 });
 
