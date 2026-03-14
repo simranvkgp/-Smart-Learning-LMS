@@ -1,9 +1,12 @@
-// Vercel serverless entry: forward every request to the Express app.
-// Rewrite sends /login -> /api/login; strip /api so Express sees /login.
+// Vercel serverless entry: rewrite sends every request to /api?path=/original-path
+// so this single handler runs; we set req.url from path for Express.
+const url = require("url");
 const app = require("../server.js");
 module.exports = (req, res) => {
-  const [path, query] = (req.url || "").split("?");
-  const newPath = path.startsWith("/api") ? (path.slice(4) || "/") : path;
-  req.url = query ? newPath + "?" + query : newPath;
+  const parsed = url.parse(req.url || "/", true);
+  const path = (parsed.query && parsed.query.path) || "/";
+  const pathOnly = path.indexOf("?") >= 0 ? path.split("?")[0] : path;
+  const rest = (parsed.search || "").replace(/^\?path=[^&]*&?/, "") || "";
+  req.url = (pathOnly.startsWith("/") ? pathOnly : "/" + pathOnly) + (rest ? (rest.startsWith("?") ? rest : "?" + rest) : "");
   app(req, res);
 };
