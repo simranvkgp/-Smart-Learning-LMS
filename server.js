@@ -83,26 +83,28 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// ===== DB READY CHECK (for auth routes) =====
+function requireDb(req, res, next) {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ message: "Database not ready. Please try again in a moment." });
+  }
+  next();
+}
 
 // =========================
 // 1️⃣ REGISTER API
 // =========================
-app.post("/register", async (req, res) => {
+app.post("/register", requireDb, async (req, res) => {
   try {
-    // Ensure DB is connected (important on Vercel serverless)
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ message: "Database not connected. Please try again in a moment." });
-    }
-
-    const { email, password, role } = req.body || {};
+    const { email, password, role } = req.body;
 
     if (!email || !password) {
-      return res.json({ message: "All fields required ❌" });
+      return res.status(400).json({ message: "All fields required ❌" });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.json({ message: "Email already registered ❌" });
+      return res.status(400).json({ message: "Email already registered ❌" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -118,10 +120,7 @@ app.post("/register", async (req, res) => {
 
   } catch (error) {
     console.error("Register error:", error);
-    const msg = error.name === "MongoError" || error.name === "MongoServerError"
-      ? "Database error. Check MONGO_URI and network."
-      : "Registration failed. Please try again.";
-    res.status(500).json({ message: msg });
+    res.status(500).json({ message: "Registration Failed ❌", error: process.env.NODE_ENV === "development" ? error.message : undefined });
   }
 });
 
@@ -129,27 +128,25 @@ app.post("/register", async (req, res) => {
 // =========================
 // 2️⃣ LOGIN API (JWT BASED)
 // =========================
-app.post("/login", async (req, res) => {
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ message: "Database not connected. Please try again in a moment." });
-    }
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-in-production";
 
-    const { email, password } = req.body || {};
+app.post("/login", requireDb, async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required ❌" });
+    }
 
     const user = await User.findOne({ email });
-    if (!user) return res.json({ message: "User not found ❌" });
+    if (!user) return res.status(401).json({ message: "User not found ❌" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.json({ message: "Invalid Password ❌" });
-
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({ message: "Server misconfigured (JWT). Contact support." });
-    }
+    if (!isMatch) return res.status(401).json({ message: "Invalid Password ❌" });
 
     const token = jwt.sign(
       { id: user._id, role: user.role, email: user.email },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: "1h" }
     );
 
@@ -157,10 +154,7 @@ app.post("/login", async (req, res) => {
 
   } catch (error) {
     console.error("Login error:", error);
-    const msg = error.name === "MongoError" || error.name === "MongoServerError"
-      ? "Database error. Check MONGO_URI and network."
-      : "Login failed. Please try again.";
-    res.status(500).json({ message: msg });
+    res.status(500).json({ message: "Login Failed ❌", error: process.env.NODE_ENV === "development" ? error.message : undefined });
   }
 });
 
