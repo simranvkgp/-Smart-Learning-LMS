@@ -378,6 +378,12 @@ const submitText = document.getElementById("submitText");
 const loadingSpinner = document.getElementById("loadingSpinner");
 const roleInput = document.getElementById("role");
 
+function getApiBase() {
+  const o = window.location.origin;
+  if (o && (o.startsWith("http://") || o.startsWith("https://"))) return o;
+  return "http://localhost:5000";
+}
+
 function selectRole(role) {
   roleInput.value = role;
   document.querySelectorAll('.role-option').forEach(option => {
@@ -433,7 +439,8 @@ registerForm.addEventListener("submit", async function(e) {
   setLoading(true);
 
   try {
-    const response = await fetch("/register", {
+    const apiBase = getApiBase();
+    const response = await fetch(apiBase + "/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

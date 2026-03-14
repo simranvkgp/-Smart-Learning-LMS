@@ -298,6 +298,13 @@ const submitBtn = document.getElementById("submitBtn");
 const submitText = document.getElementById("submitText");
 const loadingSpinner = document.getElementById("loadingSpinner");
 
+// Use same origin when served from server (e.g. http://localhost:5000); fallback when opened as file://
+function getApiBase() {
+  const o = window.location.origin;
+  if (o && (o.startsWith("http://") || o.startsWith("https://"))) return o;
+  return "http://localhost:5000";
+}
+
 function showError(message) {
   errorMessage.textContent = message;
   errorMessage.classList.add("show");
@@ -339,7 +346,8 @@ loginForm.addEventListener("submit", async function(e) {
   setLoading(true);
 
   try {
-    const response = await fetch("/login", {
+    const apiBase = getApiBase();
+    const response = await fetch(apiBase + "/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
