@@ -31,12 +31,17 @@ app.use(express.static("public")); // serves dashboard.html, student-dashboard.h
 
 // ===== MONGODB CONNECTION =====
 const mongoUri = process.env.MONGO_URI;
-if (mongoUri) {
-  mongoose.connect(mongoUri)
+function connectDb() {
+  if (!mongoUri) {
+    console.warn("MONGO_URI not set – set it in Vercel Environment Variables for the app to work.");
+    return Promise.resolve();
+  }
+  return mongoose.connect(mongoUri)
     .then(() => console.log("MongoDB Connected ✅"))
-    .catch((err) => console.log("MongoDB Error:", err));
-} else {
-  console.warn("MONGO_URI not set – set it in Vercel Environment Variables for the app to work.");
+    .catch((err) => {
+      console.error("MongoDB Error:", err.message || err);
+      return Promise.reject(err);
+    });
 }
 
 // ===== UPLOAD FOLDER SETUP =====
@@ -83,18 +88,10 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ===== DB READY CHECK (for auth routes) =====
-function requireDb(req, res, next) {
-  if (mongoose.connection.readyState !== 1) {
-    return res.status(503).json({ message: "Database not ready. Please try again in a moment." });
-  }
-  next();
-}
-
 // =========================
 // 1️⃣ REGISTER API
 // =========================
-app.post("/register", requireDb, async (req, res) => {
+app.post("/register", async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
@@ -130,7 +127,7 @@ app.post("/register", requireDb, async (req, res) => {
 // =========================
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-in-production";
 
-app.post("/login", requireDb, async (req, res) => {
+app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -1280,12 +1277,21 @@ app.use((err, req, res, next) => {
 const PORT = Number(process.env.PORT) || 5000;
 const HOST = process.env.HOST || "0.0.0.0";
 
-if (!process.env.VERCEL) {
+function startServer() {
   app.listen(PORT, HOST, () => {
     const local = `http://localhost:${PORT}`;
     const network = HOST === "0.0.0.0" ? ` http://<this-machine-ip>:${PORT}` : "";
     console.log(`🚀 LMS Server running at ${local}${network}`);
   });
+}
+
+if (!process.env.VERCEL) {
+  connectDb()
+    .then(() => startServer())
+    .catch(() => {
+      console.warn("MongoDB not connected – login/register may fail until DB is available.");
+      startServer();
+    });
 }
 
 module.exports = app;
