@@ -99,7 +99,7 @@ app.get("/", (req, res) => {
 // =========================
 app.post("/register", async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password, role } = req.body || {};
 
     if (!email || !password) {
       return res.status(400).json({ message: "All fields required ❌" });
@@ -135,7 +135,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-in-production";
 
 app.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password required ❌" });
